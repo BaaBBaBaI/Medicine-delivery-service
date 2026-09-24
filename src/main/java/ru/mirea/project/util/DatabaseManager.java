@@ -43,12 +43,14 @@ public class DatabaseManager {
 
     private void loadProperties() {
         Properties props = new Properties();
+        // 1. Попытка загрузить из classpath
         try (InputStream in = getClass().getClassLoader().getResourceAsStream("application.properties")) {
             if (in != null) {
                 props.load(in);
             }
         } catch (Exception ignored) {}
 
+        // 2. Чтение из локального файла (если изменен в проекте или рядом с jar)
         File localFile = new File("application.properties");
         if (!localFile.exists()) {
             localFile = new File("src/main/resources/application.properties");
@@ -71,10 +73,14 @@ public class DatabaseManager {
         }
     }
 
+    /**
+     * Получить новое JDBC-соединение
+     */
     public Connection getConnection() throws SQLException {
         try {
             return DriverManager.getConnection(url, user, password);
         } catch (SQLException e) {
+            // Код 3D000 - база данных не существует в PostgreSQL
             if ("3D000".equals(e.getSQLState()) && url != null && url.contains("/pharmacy_db")) {
                 createDatabaseIfNotExists();
                 return DriverManager.getConnection(url, user, password);
@@ -92,7 +98,9 @@ public class DatabaseManager {
         } catch (Exception ignored) {}
     }
 
-
+    /**
+     * Проверка доступности подключения
+     */
     public boolean testConnection() {
         try (Connection conn = getConnection()) {
             return conn.isValid(2);
@@ -103,7 +111,9 @@ public class DatabaseManager {
         }
     }
 
-
+    /**
+     * Исполнение SQL-скрипта из ресурсов classpath (например, schema.sql, data.sql)
+     */
     public void executeScript(String resourcePath) {
         try (InputStream in = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
             if (in == null) {
@@ -117,6 +127,7 @@ public class DatabaseManager {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     String trimmed = line.trim();
+                    // Пропуск комментариев
                     if (trimmed.startsWith("--") || trimmed.isEmpty()) {
                         continue;
                     }
@@ -135,6 +146,7 @@ public class DatabaseManager {
         }
     }
 
+    // Геттеры и сеттеры для гибкой настройки в рантайме
     public String getUrl() { return url; }
     public void setUrl(String url) { this.url = url; }
     public String getUser() { return user; }

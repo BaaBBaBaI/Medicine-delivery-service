@@ -29,10 +29,12 @@ public class CsvExporter implements DataExporter {
              OutputStreamWriter osw = new OutputStreamWriter(fos, StandardCharsets.UTF_8);
              BufferedWriter writer = new BufferedWriter(osw)) {
 
+            // Запись UTF-8 BOM
             fos.write(0xEF);
             fos.write(0xBB);
             fos.write(0xBF);
 
+            // Заголовки
             writer.write("ID;Номер заказа;ID клиента;ФИО клиента;Телефон;Адрес доставки;Сумма (руб.);Статус;Способ оплаты;Рецептурный;Номер рецепта;Примечание;Дата создания;Дата доставки");
             writer.newLine();
 

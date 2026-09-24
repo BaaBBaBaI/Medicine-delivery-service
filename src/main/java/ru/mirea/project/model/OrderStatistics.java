@@ -1,4 +1,80 @@
 package ru.mirea.project.model;
 
+import java.util.Map;
+
 public class OrderStatistics {
+    private final long totalClients;
+    private final long totalOrders;
+    private final long activeOrdersCount;
+    private final long deliveredOrdersCount;
+    private final long cancelledOrdersCount;
+    private final double totalDeliveredRevenue;
+    private final double averageOrderAmount;
+    private final long prescriptionOrdersCount;
+    private final double prescriptionPercentage;
+    private final Map<OrderStatus, Long> ordersByStatus;
+    private final Map<PaymentMethod, Long> ordersByPaymentMethod;
+
+    public OrderStatistics(long totalClients, long totalOrders, long activeOrdersCount,
+                           long deliveredOrdersCount, long cancelledOrdersCount,
+                           double totalDeliveredRevenue, double averageOrderAmount,
+                           long prescriptionOrdersCount, double prescriptionPercentage,
+                           Map<OrderStatus, Long> ordersByStatus,
+                           Map<PaymentMethod, Long> ordersByPaymentMethod) {
+        this.totalClients = totalClients;
+        this.totalOrders = totalOrders;
+        this.activeOrdersCount = activeOrdersCount;
+        this.deliveredOrdersCount = deliveredOrdersCount;
+        this.cancelledOrdersCount = cancelledOrdersCount;
+        this.totalDeliveredRevenue = totalDeliveredRevenue;
+        this.averageOrderAmount = averageOrderAmount;
+        this.prescriptionOrdersCount = prescriptionOrdersCount;
+        this.prescriptionPercentage = prescriptionPercentage;
+        this.ordersByStatus = ordersByStatus;
+        this.ordersByPaymentMethod = ordersByPaymentMethod;
+    }
+
+    public long getTotalClients() {
+        return totalClients;
+    }
+
+    public long getTotalOrders() {
+        return totalOrders;
+    }
+
+    public long getActiveOrdersCount() {
+        return activeOrdersCount;
+    }
+
+    public long getDeliveredOrdersCount() {
+        return deliveredOrdersCount;
+    }
+
+    public long getCancelledOrdersCount() {
+        return cancelledOrdersCount;
+    }
+
+    public double getTotalDeliveredRevenue() {
+        return totalDeliveredRevenue;
+    }
+
+    public double getAverageOrderAmount() {
+        return averageOrderAmount;
+    }
+
+    public long getPrescriptionOrdersCount() {
+        return prescriptionOrdersCount;
+    }
+
+    public double getPrescriptionPercentage() {
+        return prescriptionPercentage;
+    }
+
+    public Map<OrderStatus, Long> getOrdersByStatus() {
+        return ordersByStatus;
+    }
+
+    public Map<PaymentMethod, Long> getOrdersByPaymentMethod() {
+        return ordersByPaymentMethod;
+    }
 }
