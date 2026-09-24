@@ -1,0 +1,59 @@
+@startuml
+!theme plain
+hide empty methods
+hide empty fields
+
+skinparam class {
+    BackgroundColor #F8F9FA
+    ArrowColor #005B5C
+    BorderColor #2C3E50
+}
+
+entity "users" as users {
+    * **id** : BIGSERIAL <<PK>>
+    --
+    * **full_name** : VARCHAR(150)
+    * **phone** : VARCHAR(25) <<UNIQUE>>
+    * **email** : VARCHAR(100) <<UNIQUE>>
+    * **default_address** : VARCHAR(255)
+    * **registered_at** : TIMESTAMP
+}
+
+entity "medicine_orders" as orders {
+    * **id** : BIGSERIAL <<PK>>
+    --
+    * **order_number** : VARCHAR(30) <<UNIQUE>>
+    * **client_id** : BIGINT <<FK>>
+    * **delivery_address** : VARCHAR(255)
+    * **contact_phone** : VARCHAR(25)
+    * **total_amount** : NUMERIC(10, 2)
+    * **status** : VARCHAR(30)
+    * **payment_method** : VARCHAR(30)
+    * **prescription_required** : BOOLEAN
+      **prescription_number** : VARCHAR(60)
+      **delivery_notes** : TEXT
+    * **created_at** : TIMESTAMP
+      **delivered_at** : TIMESTAMP
+}
+
+enum "OrderStatus" as OrderStatus {
+    CREATED
+    CONFIRMED
+    ASSEMBLING
+    IN_DELIVERY
+    DELIVERED
+    CANCELLED
+}
+
+enum "PaymentMethod" as PaymentMethod {
+    CASH
+    CARD_ON_DELIVERY
+    CARD_ONLINE
+    SBP
+}
+
+users ||--o{ orders : "1 : N (оформляет заказы)"
+orders .. OrderStatus : "status"
+orders .. PaymentMethod : "payment_method"
+
+@enduml
