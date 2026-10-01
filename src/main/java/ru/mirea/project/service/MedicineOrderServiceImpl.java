@@ -50,7 +50,7 @@ public class MedicineOrderServiceImpl implements MedicineOrderService {
             throw new BusinessException("Заказ с номером '" + order.getOrderNumber() + "' уже существует в системе.");
         });
 
-        /
+        
         validateAddressAndPhone(order.getDeliveryAddress(), order.getContactPhone());
 
        

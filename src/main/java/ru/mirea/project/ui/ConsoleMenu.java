@@ -629,7 +629,7 @@ public class ConsoleMenu {
                     truncate(u.getEmail(), 26), truncate(u.getDefaultAddress(), 42));
         }
         System.out.println("+----+-----------------------------+---------------------+----------------------------+--------------------------------------------+");
-        System.out.println("Всего клиентов: " + clients.size());
+        System.out.println("Всего клиентов: " + clients.size());    
     }
 
     private void printSingleClient(User u) {

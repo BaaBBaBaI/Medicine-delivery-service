@@ -12,7 +12,7 @@ public class MedicineOrder {
     private Long id;
     private String orderNumber;
     private Long clientId;
-    private User client; // Заполняется через JOIN в репозитории для удобства отображения
+    private User client;
     private String deliveryAddress;
     private String contactPhone;
     private double totalAmount;

@@ -27,13 +27,11 @@ public class ExcelExporter implements DataExporter {
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("Заказы доставки лекарств");
 
-            // Настройка стилей
             CellStyle headerStyle = createHeaderStyle(workbook);
             CellStyle dataStyle = createDataStyle(workbook);
             CellStyle currencyStyle = createCurrencyStyle(workbook);
             CellStyle dateStyle = createDateStyle(workbook);
 
-            // Шапка таблицы
             String[] headers = {
                     "ID", "Номер заказа", "Клиент", "Телефон", "Адрес доставки",
                     "Сумма (руб.)", "Статус", "Оплата", "Рецепт", "№ Рецепта",
