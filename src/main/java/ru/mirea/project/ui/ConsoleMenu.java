@@ -578,12 +578,16 @@ public class ConsoleMenu {
             String input = scanner.nextLine().trim();
             try {
                 long val = Long.parseLong(input);
-                if (val > 0) {
+                if (val > 0 && val <= 1_000_000_000L) {
                     return val;
                 }
-                System.out.println("Ошибка: ID должен быть строго положительным числом.");
+                if (val <= 0) {
+                    System.out.println("Ошибка: ID должен быть строго положительным числом.");
+                } else {
+                    System.out.println("Ошибка: ID не может превышать 1 000 000 000. Повторите попытку.");
+                }
             } catch (NumberFormatException e) {
-                System.out.println("Ошибка: ID должен быть целым числом. Повторите попытку.");
+                System.out.println("Ошибка: ID должен быть положительным целым числом (макс. 1 000 000 000). Повторите попытку.");
             }
         }
     }

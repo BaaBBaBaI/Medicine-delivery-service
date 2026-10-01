@@ -5,8 +5,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 /**
- * Сущность клиента / пользователя системы доставки лекарств.
- * Демонстрирует инкапсуляцию: private-поля, геттеры/сеттеры, конструкторы.
+ * Сущность клиента / пользователя системы.
  */
 public class User {
     private Long id;

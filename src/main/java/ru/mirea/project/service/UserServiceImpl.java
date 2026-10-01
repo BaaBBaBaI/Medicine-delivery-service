@@ -40,6 +40,9 @@ public class UserServiceImpl implements UserService {
         if (id == null || id <= 0) {
             throw new BusinessException("ID клиента должен быть положительным числом.");
         }
+        if (id > 1_000_000_000L) {
+            throw new BusinessException("ID клиента не должен превышать 1 000 000 000.");
+        }
         return userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Клиент", id));
     }
@@ -51,8 +54,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User updateUser(User user) {
-        if (user.getId() == null) {
-            throw new BusinessException("Для обновления клиента необходимо передать его ID.");
+        if (user.getId() == null || user.getId() <= 0) {
+            throw new BusinessException("Для обновления клиента необходимо передать корректный ID.");
+        }
+        if (user.getId() > 1_000_000_000L) {
+            throw new BusinessException("ID клиента не должен превышать 1 000 000 000.");
         }
         validateUser(user);
 
@@ -81,6 +87,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUser(Long id) {
+        if (id == null || id <= 0) {
+            throw new BusinessException("ID клиента должен быть положительным числом.");
+        }
+        if (id > 1_000_000_000L) {
+            throw new BusinessException("ID клиента не должен превышать 1 000 000 000.");
+        }
         getUserById(id); 
         boolean deleted = userRepository.deleteById(id);
         if (!deleted) {
@@ -93,6 +105,9 @@ public class UserServiceImpl implements UserService {
         if (name == null || name.trim().isEmpty()) {
             return getAllUsers();
         }
+        if (name.trim().length() > 150) {
+            throw new BusinessException("Поисковый запрос по ФИО не должен превышать 150 символов.");
+        }
         return userRepository.searchByName(name.trim());
     }
 
@@ -103,14 +118,26 @@ public class UserServiceImpl implements UserService {
         if (user.getFullName() == null || user.getFullName().trim().length() < 2) {
             throw new BusinessException("ФИО клиента обязательно и должно содержать не менее 2 символов.");
         }
+        if (user.getFullName().trim().length() > 150) {
+            throw new BusinessException("ФИО клиента не должно превышать 150 символов.");
+        }
         if (user.getPhone() == null || user.getPhone().trim().length() < 6) {
             throw new BusinessException("Контактный телефон обязателен (не менее 6 символов).");
         }
-        if (user.getEmail() == null || !user.getEmail().contains("@")) {
+        if (user.getPhone().trim().length() > 25) {
+            throw new BusinessException("Контактный телефон не должен превышать 25 символов.");
+        }
+        if (user.getEmail() == null || !user.getEmail().contains("@") || user.getEmail().trim().length() < 5) {
             throw new BusinessException("Указан некорректный адрес электронной почты: " + user.getEmail());
+        }
+        if (user.getEmail().trim().length() > 100) {
+            throw new BusinessException("Email не должен превышать 100 символов.");
         }
         if (user.getDefaultAddress() == null || user.getDefaultAddress().trim().length() < 5) {
             throw new BusinessException("Адрес доставки обязателен (не менее 5 символов).");
+        }
+        if (user.getDefaultAddress().trim().length() > 255) {
+            throw new BusinessException("Адрес доставки не должен превышать 255 символов.");
         }
     }
 }

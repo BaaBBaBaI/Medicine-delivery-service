@@ -12,8 +12,6 @@ import java.util.stream.Collectors;
 
 /**
  * Реализация сервиса заказов доставки лекарств.
- * Содержит строгую реализацию всех бизнес-правил,
- * применение Java Collections Framework и Stream API.
  */
 public class MedicineOrderServiceImpl implements MedicineOrderService {
 
@@ -69,6 +67,9 @@ public class MedicineOrderServiceImpl implements MedicineOrderService {
     public MedicineOrder getOrderById(Long id) {
         if (id == null || id <= 0) {
             throw new BusinessException("ID заказа должен быть положительным числом.");
+        }
+        if (id > 1_000_000_000L) {
+            throw new BusinessException("ID заказа не должен превышать 1 000 000 000.");
         }
         return orderRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Заказ доставки лекарств", id));
@@ -296,8 +297,14 @@ public class MedicineOrderServiceImpl implements MedicineOrderService {
         if (address == null || address.trim().length() < 5) {
             throw new BusinessException("Адрес доставки обязателен (не менее 5 символов).");
         }
+        if (address.trim().length() > 255) {
+            throw new BusinessException("Адрес доставки не должен превышать 255 символов.");
+        }
         if (phone == null || phone.trim().length() < 6) {
             throw new BusinessException("Контактный номер телефона обязателен (не менее 6 символов).");
+        }
+        if (phone.trim().length() > 25) {
+            throw new BusinessException("Контактный номер телефона не должен превышать 25 символов.");
         }
     }
 
@@ -314,6 +321,9 @@ public class MedicineOrderServiceImpl implements MedicineOrderService {
         if (isRequired) {
             if (prescriptionNumber == null || prescriptionNumber.trim().isEmpty()) {
                 throw new BusinessException("Для рецептурных препаратов обязательно указание номера рецепта.");
+            }
+            if (prescriptionNumber.trim().length() > 60) {
+                throw new BusinessException("Номер рецепта не должен превышать 60 символов.");
             }
         }
     }

@@ -8,10 +8,6 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-/**
- * Экспортер данных в формат CSV.
- * Пишет UTF-8 BOM для корректного открытия в Microsoft Excel на русском языке.
- */
 public class CsvExporter implements DataExporter {
 
     @Override

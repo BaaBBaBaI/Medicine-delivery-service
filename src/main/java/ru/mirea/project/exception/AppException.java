@@ -1,7 +1,7 @@
 package ru.mirea.project.exception;
 
 /**
- * Базовое непроверяемое исключение приложения.
+ * basic uncategorised exception.
  */
 public class AppException extends RuntimeException {
     public AppException(String message) {

@@ -5,8 +5,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 /**
- * Основная сущность информационной системы — Заказ доставки лекарств.
- * Связана с сущностью User через внешний ключ clientId.
+ * Основная сущность — Заказ доставки лекарств.
  */
 public class MedicineOrder {
     private Long id;

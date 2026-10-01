@@ -1,14 +1,7 @@
--- ===================================================================
--- Скрипт создания структуры базы данных (DDL)
--- Предметная область: Заказ доставки лекарств (РТУ МИРЭА, КР 1)
--- СУБД: PostgreSQL
--- ===================================================================
 
--- Удаление таблиц в правильном порядке (с учетом внешних ключей)
 DROP TABLE IF EXISTS medicine_orders CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 
--- 1. Таблица клиентов/пользователей информационной системы
 CREATE TABLE users (
     id BIGSERIAL PRIMARY KEY,
     full_name VARCHAR(150) NOT NULL,
@@ -20,11 +13,9 @@ CREATE TABLE users (
     CONSTRAINT chk_users_name_not_empty CHECK (length(trim(full_name)) >= 2)
 );
 
--- Индексы для ускорения поиска пользователей
 CREATE INDEX idx_users_phone ON users(phone);
 CREATE INDEX idx_users_email ON users(email);
 
--- 2. Таблица заказов доставки лекарств (Основная сущность)
 CREATE TABLE medicine_orders (
     id BIGSERIAL PRIMARY KEY,
     order_number VARCHAR(30) NOT NULL UNIQUE,
@@ -40,11 +31,9 @@ CREATE TABLE medicine_orders (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     delivered_at TIMESTAMP,
     
-    -- Внешний ключ: связь с таблицей клиентов (FOREIGN KEY)
     CONSTRAINT fk_orders_client FOREIGN KEY (client_id) 
         REFERENCES users(id) ON DELETE RESTRICT ON UPDATE CASCADE,
         
-    -- Ограничения допустимых значений (CHECK)
     CONSTRAINT chk_orders_amount_positive CHECK (total_amount > 0),
     CONSTRAINT chk_orders_status CHECK (status IN (
         'CREATED', 'CONFIRMED', 'ASSEMBLING', 'IN_DELIVERY', 'DELIVERED', 'CANCELLED'
@@ -58,7 +47,6 @@ CREATE TABLE medicine_orders (
     )
 );
 
--- Индексы для внешнего ключа, статуса и номера заказа
 CREATE INDEX idx_orders_client_id ON medicine_orders(client_id);
 CREATE INDEX idx_orders_status ON medicine_orders(status);
 CREATE INDEX idx_orders_created_at ON medicine_orders(created_at);

@@ -23,14 +23,12 @@
     </properties>
 
     <dependencies>
-        <!-- PostgreSQL JDBC Driver -->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>${postgresql.version}</version>
         </dependency>
 
-        <!-- Apache POI for Excel (.xlsx) Export -->
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi</artifactId>
@@ -42,7 +40,6 @@
             <version>${poi.version}</version>
         </dependency>
 
-        <!-- Log4j API & Core for Apache POI dependencies -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
@@ -57,7 +54,6 @@
 
     <build>
         <plugins>
-            <!-- Maven Compiler Plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -85,7 +81,6 @@
                 </configuration>
             </plugin>
 
-            <!-- Maven Shade Plugin to create executable fat-jar with all dependencies -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>

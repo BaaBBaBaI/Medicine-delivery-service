@@ -15,8 +15,6 @@ import java.util.Optional;
 
 /**
  * JDBC-реализация репозитория заказов доставки лекарств.
- * Реализует выборку связанных данных (JOIN с таблицей users),
- * параметризованные SQL-запросы, сохранение транзакционной целостности.
  */
 public class JdbcMedicineOrderRepository implements MedicineOrderRepository {
 

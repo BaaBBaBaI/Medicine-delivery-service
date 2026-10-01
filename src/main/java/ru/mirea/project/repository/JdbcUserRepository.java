@@ -12,7 +12,6 @@ import java.util.Optional;
 
 /**
  * JDBC-реализация репозитория пользователей.
- * Строго использует PreparedStatement, try-with-resources и параметризованные запросы.
  */
 public class JdbcUserRepository implements UserRepository {
 

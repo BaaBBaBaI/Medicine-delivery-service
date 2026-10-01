@@ -4,10 +4,10 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Обобщенный интерфейс репозитория CRUD (демонстрация применения интерфейсов и полиморфизма).
+ * Обобщенный интерфейс репозитория CRUD.
  *
- * @param <T>  тип сущности
- * @param <ID> тип идентификатора
+ * @param <T> 
+ * @param <ID>
  */
 public interface CrudRepository<T, ID> {
     T save(T entity);
