@@ -1,5 +1,7 @@
 package ru.mirea.project;
 
+import java.net.URL;
+
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -16,11 +18,6 @@ import ru.mirea.project.service.UserService;
 import ru.mirea.project.service.UserServiceImpl;
 import ru.mirea.project.util.DatabaseManager;
 
-import java.net.URL;
-
-/**
- * Главный класс настольного JavaFX-приложения «Заказ доставки лекарств» (КР №2).
- */
 public class MedicineDeliveryFxApplication extends Application {
 
     @Override
@@ -44,9 +41,9 @@ public class MedicineDeliveryFxApplication extends Application {
             scene.getStylesheets().add(cssUrl.toExternalForm());
         }
 
-        primaryStage.setTitle("ИС «Заказ доставки лекарств» — Панель фармацевта-диспетчера (РТУ МИРЭА, КР №2)");
-        primaryStage.setMinWidth(1080);
-        primaryStage.setMinHeight(680);
+        primaryStage.setTitle("ИС «Заказ доставки лекарств» — Панель фармацевта-диспетчера");
+        primaryStage.setMinWidth(1330);
+        primaryStage.setMinHeight(720);
         primaryStage.setScene(scene);
         primaryStage.show();
     }

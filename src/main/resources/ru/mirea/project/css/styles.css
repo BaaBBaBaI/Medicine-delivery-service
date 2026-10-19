@@ -1,8 +1,3 @@
-/* =========================================================================
-   Основная таблица стилей ИС «Заказ доставки лекарств» (КР №2 JavaFX)
-   Оформляет кнопки, таблицы, формы ввода, заголовки, контейнеры и ошибки
-   ========================================================================= */
-
 .root, .app-root {
     -fx-font-family: "Segoe UI", "Inter", "Noto Sans", sans-serif;
     -fx-font-size: 13px;
@@ -75,6 +70,18 @@
 }
 .btn-secondary:hover {
     -fx-background-color: #ccfbf1;
+}
+
+.header-bar .button,
+.header-bar .menu-button {
+    -fx-pref-height: 40px;
+    -fx-min-height: 40px;
+    -fx-max-height: 40px;
+    -fx-padding: 0 16 0 16;
+}
+
+.header-bar .menu-button > .arrow-button {
+    -fx-padding: 0 0 0 4;
 }
 
 .btn-outline {

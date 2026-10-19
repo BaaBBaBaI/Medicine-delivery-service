@@ -13,9 +13,11 @@
     <top>
         <VBox spacing="10" styleClass="top-header-container">
             <HBox alignment="CENTER_LEFT" spacing="14" styleClass="header-bar">
-                <VBox spacing="2" HBox.hgrow="ALWAYS">
-                    <Label text="Заказ доставки лекарств" styleClass="app-title"/>
-                </VBox>
+                <Label text="Заказ доставки лекарств" styleClass="app-title"/>
+                
+                <!-- Пружина, которая прижимает всё остальное вправо -->
+                <Region HBox.hgrow="ALWAYS" />
+
                 <Label fx:id="dbConnectionBadge" text="БД PostgreSQL: проверка..." styleClass="connection-badge"/>
                 <Button text="Клиенты (связанная сущность)" onAction="#handleOpenClientsDialog" styleClass="btn-secondary"/>
                 <Button text="Статистика и аналитика" onAction="#handleOpenStatisticsDialog" styleClass="btn-secondary"/>
@@ -44,19 +46,20 @@
                     <Button text="Обновить" onAction="#handleRefreshData" styleClass="btn-outline"/>
                 </HBox>
 
+                <!-- Строка фильтров: надписи защищены от сжатия, ComboBox сжимаются -->
                 <HBox spacing="10" alignment="CENTER_LEFT">
-                    <Label text="Фильтры:" styleClass="filter-label"/>
-                    <ComboBox fx:id="statusFilterCombo" onAction="#handleApplySearchAndFilters" prefWidth="175" promptText="Все статусы"/>
-                    <ComboBox fx:id="paymentFilterCombo" onAction="#handleApplySearchAndFilters" prefWidth="205" promptText="Все способы оплаты"/>
-                    <ComboBox fx:id="prescriptionFilterCombo" onAction="#handleApplySearchAndFilters" prefWidth="185"/>
-                    <ComboBox fx:id="clientFilterCombo" onAction="#handleApplySearchAndFilters" prefWidth="210" promptText="Все клиенты"/>
+                    <Label text="Фильтры:" minWidth="-Infinity" styleClass="filter-label"/>
+                    <ComboBox fx:id="statusFilterCombo" onAction="#handleApplySearchAndFilters" prefWidth="175" minWidth="90" promptText="Все статусы"/>
+                    <ComboBox fx:id="paymentFilterCombo" onAction="#handleApplySearchAndFilters" prefWidth="205" minWidth="110" promptText="Все способы оплаты"/>
+                    <ComboBox fx:id="prescriptionFilterCombo" onAction="#handleApplySearchAndFilters" prefWidth="185" minWidth="90"/>
+                    <ComboBox fx:id="clientFilterCombo" onAction="#handleApplySearchAndFilters" prefWidth="210" minWidth="110" promptText="Все клиенты"/>
 
-                    <Label text="Сумма (₽):" styleClass="filter-label"/>
-                    <TextField fx:id="minAmountField" onAction="#handleApplySearchAndFilters" promptText="От" prefWidth="75"/>
-                    <TextField fx:id="maxAmountField" onAction="#handleApplySearchAndFilters" promptText="До" prefWidth="75"/>
+                    <Label text="Сумма (₽):" minWidth="-Infinity" styleClass="filter-label"/>
+                    <TextField fx:id="minAmountField" onAction="#handleApplySearchAndFilters" promptText="От" prefWidth="75" minWidth="45"/>
+                    <TextField fx:id="maxAmountField" onAction="#handleApplySearchAndFilters" promptText="До" prefWidth="75" minWidth="45"/>
 
-                    <Label text="Сортировка:" styleClass="filter-label"/>
-                    <ComboBox fx:id="sortCombo" onAction="#handleApplySearchAndFilters" prefWidth="230" HBox.hgrow="ALWAYS"/>
+                    <Label text="Сортировка:" minWidth="-Infinity" styleClass="filter-label"/>
+                    <ComboBox fx:id="sortCombo" onAction="#handleApplySearchAndFilters" prefWidth="230" minWidth="120" HBox.hgrow="ALWAYS"/>
                 </HBox>
 
                 <Label fx:id="filterErrorLabel" visible="false" managed="false" styleClass="error-banner"/>
