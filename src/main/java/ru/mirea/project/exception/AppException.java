@@ -1,8 +1,5 @@
 package ru.mirea.project.exception;
 
-/**
- * basic uncategorised exception.
- */
 public class AppException extends RuntimeException {
     public AppException(String message) {
         super(message);

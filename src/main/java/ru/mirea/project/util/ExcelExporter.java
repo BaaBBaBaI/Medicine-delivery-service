@@ -7,10 +7,6 @@ import ru.mirea.project.model.MedicineOrder;
 import java.io.FileOutputStream;
 import java.util.List;
 
-/**
- * Экспортер данных в формат Excel (.xlsx) с использованием библиотеки Apache POI.
- * Форматирует шапку таблицы, настраивает цвета, границы ячеек и автоматическую ширину колонок.
- */
 public class ExcelExporter implements DataExporter {
 
     @Override
@@ -46,83 +42,66 @@ public class ExcelExporter implements DataExporter {
                 cell.setCellStyle(headerStyle);
             }
 
-            // Заполнение данными
             int rowIdx = 1;
             for (MedicineOrder order : orders) {
                 Row row = sheet.createRow(rowIdx++);
                 row.setHeightInPoints(18);
 
-                // ID
                 Cell c0 = row.createCell(0);
-                c0.setCellValue(order.getId());
+                c0.setCellValue(order.getId() != null ? order.getId() : 0);
                 c0.setCellStyle(dataStyle);
 
-                // Номер заказа
                 Cell c1 = row.createCell(1);
                 c1.setCellValue(order.getOrderNumber());
                 c1.setCellStyle(dataStyle);
 
-                // Клиент
                 Cell c2 = row.createCell(2);
-                String clientName = order.getClient() != null ? order.getClient().getFullName() : ("Клиент #" + order.getClientId());
-                c2.setCellValue(clientName);
+                c2.setCellValue(order.getClientDisplayName());
                 c2.setCellStyle(dataStyle);
 
-                // Телефон
                 Cell c3 = row.createCell(3);
                 c3.setCellValue(order.getContactPhone());
                 c3.setCellStyle(dataStyle);
 
-                // Адрес доставки
                 Cell c4 = row.createCell(4);
                 c4.setCellValue(order.getDeliveryAddress());
                 c4.setCellStyle(dataStyle);
 
-                // Сумма
                 Cell c5 = row.createCell(5);
                 c5.setCellValue(order.getTotalAmount());
                 c5.setCellStyle(currencyStyle);
 
-                // Статус
                 Cell c6 = row.createCell(6);
                 c6.setCellValue(order.getStatus().getDisplayName());
                 c6.setCellStyle(dataStyle);
 
-                // Способ оплаты
                 Cell c7 = row.createCell(7);
                 c7.setCellValue(order.getPaymentMethod().getDisplayName());
                 c7.setCellStyle(dataStyle);
 
-                // Рецептурный
                 Cell c8 = row.createCell(8);
                 c8.setCellValue(order.isPrescriptionRequired() ? "Да" : "Нет");
                 c8.setCellStyle(dataStyle);
 
-                // Номер рецепта
                 Cell c9 = row.createCell(9);
                 c9.setCellValue(order.getPrescriptionNumber() != null ? order.getPrescriptionNumber() : "—");
                 c9.setCellStyle(dataStyle);
 
-                // Примечание
                 Cell c10 = row.createCell(10);
                 c10.setCellValue(order.getDeliveryNotes() != null ? order.getDeliveryNotes() : "");
                 c10.setCellStyle(dataStyle);
 
-                // Дата создания
                 Cell c11 = row.createCell(11);
-                c11.setCellValue(order.getCreatedAt() != null ? order.getCreatedAt().format(MedicineOrder.DATE_FORMATTER) : "—");
+                c11.setCellValue(order.getCreatedAtFormatted());
                 c11.setCellStyle(dateStyle);
 
-                // Дата доставки
                 Cell c12 = row.createCell(12);
-                c12.setCellValue(order.getDeliveredAt() != null ? order.getDeliveredAt().format(MedicineOrder.DATE_FORMATTER) : "—");
+                c12.setCellValue(order.getDeliveredAtFormatted());
                 c12.setCellStyle(dateStyle);
             }
 
-            // Автоподбор ширины колонок
             for (int i = 0; i < headers.length; i++) {
                 sheet.autoSizeColumn(i);
-                // Дополнительный отступ для читаемости
                 int currentWidth = sheet.getColumnWidth(i);
                 sheet.setColumnWidth(i, Math.min(currentWidth + 1000, 15000));
             }

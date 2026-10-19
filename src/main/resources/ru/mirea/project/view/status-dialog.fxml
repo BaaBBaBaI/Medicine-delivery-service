@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="ru.mirea.project.controller.StatusChangeController"
+      spacing="14" styleClass="dialog-root">
+
+    <Label text="Управление жизненным циклом заказа" styleClass="dialog-title"/>
+    <Label fx:id="orderInfoLabel" styleClass="field-value-bold" wrapText="true"/>
+
+    <Label fx:id="errorLabel" visible="false" managed="false" wrapText="true" styleClass="error-banner"/>
+
+    <VBox spacing="6" styleClass="info-box">
+        <Label text="Текущий статус заказа:" styleClass="field-caption"/>
+        <Label fx:id="currentStatusLabel" styleClass="field-value" wrapText="true"/>
+    </VBox>
+
+    <VBox spacing="6">
+        <Label text="Выберите новый допустимый статус:" styleClass="form-label"/>
+        <ComboBox fx:id="nextStatusComboBox" maxWidth="Infinity"/>
+        <Label fx:id="statusDescriptionLabel" styleClass="field-caption" wrapText="true"/>
+    </VBox>
+
+    <Pane VBox.vgrow="ALWAYS"/>
+
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Button text="Отмена" onAction="#handleCancel" styleClass="btn-outline"/>
+        <Button text="Подтвердить переход статуса" onAction="#handleApplyStatus" defaultButton="true" styleClass="btn-primary"/>
+    </HBox>
+</VBox>

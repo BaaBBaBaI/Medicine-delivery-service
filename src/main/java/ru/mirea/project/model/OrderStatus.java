@@ -37,7 +37,6 @@ public enum OrderStatus {
         return !active;
     }
 
-
     public boolean canTransitionTo(OrderStatus next) {
         if (this == next) return true;
         if (isFinal()) {
@@ -60,5 +59,10 @@ public enum OrderStatus {
 
     public static Set<OrderStatus> getActiveStatuses() {
         return EnumSet.of(CREATED, CONFIRMED, ASSEMBLING, IN_DELIVERY);
+    }
+
+    @Override
+    public String toString() {
+        return displayName;
     }
 }

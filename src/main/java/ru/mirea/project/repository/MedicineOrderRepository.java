@@ -6,9 +6,6 @@ import ru.mirea.project.model.OrderStatus;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Интерфейс репозитория для работы с заказами доставки лекарств.
- */
 public interface MedicineOrderRepository extends CrudRepository<MedicineOrder, Long> {
     Optional<MedicineOrder> findByOrderNumber(String orderNumber);
     List<MedicineOrder> findByClientId(Long clientId);

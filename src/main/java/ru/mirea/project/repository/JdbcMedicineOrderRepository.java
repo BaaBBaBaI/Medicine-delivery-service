@@ -13,14 +13,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * JDBC-реализация репозитория заказов доставки лекарств.
- */
 public class JdbcMedicineOrderRepository implements MedicineOrderRepository {
 
     private final DatabaseManager dbManager;
 
-    private static final String SELECT_BASE = 
+    private static final String SELECT_BASE =
             "SELECT o.id, o.order_number, o.client_id, o.delivery_address, o.contact_phone, " +
             "       o.total_amount, o.status, o.payment_method, o.prescription_required, " +
             "       o.prescription_number, o.delivery_notes, o.created_at, o.delivered_at, " +
@@ -55,7 +52,7 @@ public class JdbcMedicineOrderRepository implements MedicineOrderRepository {
             stmt.setString(6, order.getStatus().name());
             stmt.setString(7, order.getPaymentMethod().name());
             stmt.setBoolean(8, order.isPrescriptionRequired());
-            stmt.setString(9, order.getPrescriptionNumber());
+            stmt.setString(9, order.isPrescriptionRequired() ? order.getPrescriptionNumber() : null);
             stmt.setString(10, order.getDeliveryNotes());
             stmt.setTimestamp(11, Timestamp.valueOf(order.getCreatedAt() != null ? order.getCreatedAt() : LocalDateTime.now()));
             stmt.setTimestamp(12, order.getDeliveredAt() != null ? Timestamp.valueOf(order.getDeliveredAt()) : null);
@@ -111,23 +108,24 @@ public class JdbcMedicineOrderRepository implements MedicineOrderRepository {
 
     @Override
     public boolean update(MedicineOrder order) {
-        String sql = "UPDATE medicine_orders SET delivery_address = ?, contact_phone = ?, " +
+        String sql = "UPDATE medicine_orders SET client_id = ?, delivery_address = ?, contact_phone = ?, " +
                      "total_amount = ?, status = ?, payment_method = ?, prescription_required = ?, " +
                      "prescription_number = ?, delivery_notes = ?, delivered_at = ? WHERE id = ?";
 
         try (Connection conn = dbManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setString(1, order.getDeliveryAddress());
-            stmt.setString(2, order.getContactPhone());
-            stmt.setDouble(3, order.getTotalAmount());
-            stmt.setString(4, order.getStatus().name());
-            stmt.setString(5, order.getPaymentMethod().name());
-            stmt.setBoolean(6, order.isPrescriptionRequired());
-            stmt.setString(7, order.getPrescriptionNumber());
-            stmt.setString(8, order.getDeliveryNotes());
-            stmt.setTimestamp(9, order.getDeliveredAt() != null ? Timestamp.valueOf(order.getDeliveredAt()) : null);
-            stmt.setLong(10, order.getId());
+            stmt.setLong(1, order.getClientId());
+            stmt.setString(2, order.getDeliveryAddress());
+            stmt.setString(3, order.getContactPhone());
+            stmt.setDouble(4, order.getTotalAmount());
+            stmt.setString(5, order.getStatus().name());
+            stmt.setString(6, order.getPaymentMethod().name());
+            stmt.setBoolean(7, order.isPrescriptionRequired());
+            stmt.setString(8, order.isPrescriptionRequired() ? order.getPrescriptionNumber() : null);
+            stmt.setString(9, order.getDeliveryNotes());
+            stmt.setTimestamp(10, order.getDeliveredAt() != null ? Timestamp.valueOf(order.getDeliveredAt()) : null);
+            stmt.setLong(11, order.getId());
 
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -229,9 +227,11 @@ public class JdbcMedicineOrderRepository implements MedicineOrderRepository {
     public List<MedicineOrder> searchByKeyword(String keyword) {
         String sql = SELECT_BASE +
                      "WHERE LOWER(o.order_number) LIKE LOWER(?) " +
-                     "   OR LOWER(o.delivery_notes) LIKE LOWER(?) " +
+                     "   OR LOWER(COALESCE(o.delivery_notes, '')) LIKE LOWER(?) " +
                      "   OR LOWER(o.delivery_address) LIKE LOWER(?) " +
                      "   OR LOWER(u.full_name) LIKE LOWER(?) " +
+                     "   OR LOWER(o.contact_phone) LIKE LOWER(?) " +
+                     "   OR LOWER(COALESCE(o.prescription_number, '')) LIKE LOWER(?) " +
                      "ORDER BY o.id DESC";
         List<MedicineOrder> orders = new ArrayList<>();
 
@@ -239,10 +239,9 @@ public class JdbcMedicineOrderRepository implements MedicineOrderRepository {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             String param = "%" + keyword + "%";
-            stmt.setString(1, param);
-            stmt.setString(2, param);
-            stmt.setString(3, param);
-            stmt.setString(4, param);
+            for (int i = 1; i <= 6; i++) {
+                stmt.setString(i, param);
+            }
 
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {

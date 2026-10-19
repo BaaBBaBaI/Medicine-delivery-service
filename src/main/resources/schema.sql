@@ -1,4 +1,3 @@
-
 DROP TABLE IF EXISTS medicine_orders CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 

@@ -10,9 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * JDBC-реализация репозитория пользователей.
- */
 public class JdbcUserRepository implements UserRepository {
 
     private final DatabaseManager dbManager;
@@ -117,6 +114,9 @@ public class JdbcUserRepository implements UserRepository {
             stmt.setLong(1, id);
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
+            if ("23503".equals(e.getSQLState())) {
+                throw new DatabaseException("Невозможно удалить клиента, так как за ним числятся заказы в системе.", e);
+            }
             throw new DatabaseException("Ошибка удаления пользователя ID=" + id + ": " + e.getMessage(), e);
         }
     }
@@ -159,7 +159,7 @@ public class JdbcUserRepository implements UserRepository {
 
     @Override
     public Optional<User> findByEmail(String email) {
-        String sql = "SELECT id, full_name, phone, email, default_address, registered_at FROM users WHERE email = ?";
+        String sql = "SELECT id, full_name, phone, email, default_address, registered_at FROM users WHERE LOWER(email) = LOWER(?)";
 
         try (Connection conn = dbManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -179,13 +179,17 @@ public class JdbcUserRepository implements UserRepository {
     @Override
     public List<User> searchByName(String namePart) {
         String sql = "SELECT id, full_name, phone, email, default_address, registered_at FROM users " +
-                     "WHERE LOWER(full_name) LIKE LOWER(?) ORDER BY id ASC";
+                     "WHERE LOWER(full_name) LIKE LOWER(?) OR LOWER(phone) LIKE LOWER(?) OR LOWER(email) LIKE LOWER(?) " +
+                     "ORDER BY id ASC";
         List<User> users = new ArrayList<>();
 
         try (Connection conn = dbManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setString(1, "%" + namePart + "%");
+            String pattern = "%" + namePart + "%";
+            stmt.setString(1, pattern);
+            stmt.setString(2, pattern);
+            stmt.setString(3, pattern);
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     users.add(mapRowToUser(rs));
@@ -193,7 +197,7 @@ public class JdbcUserRepository implements UserRepository {
             }
             return users;
         } catch (SQLException e) {
-            throw new DatabaseException("Ошибка поиска пользователей по имени: " + e.getMessage(), e);
+            throw new DatabaseException("Ошибка поиска пользователей: " + e.getMessage(), e);
         }
     }
 
