@@ -9,13 +9,11 @@
             fx:controller="ru.mirea.project.controller.MainController"
             styleClass="app-root">
 
-    <!-- ВЕРХНЯЯ ПАНЕЛЬ: Заголовок и основные действия системы -->
     <top>
         <VBox spacing="10" styleClass="top-header-container">
             <HBox alignment="CENTER_LEFT" spacing="14" styleClass="header-bar">
                 <Label text="Заказ доставки лекарств" styleClass="app-title"/>
                 
-                <!-- Пружина, которая прижимает всё остальное вправо -->
                 <Region HBox.hgrow="ALWAYS" />
 
                 <Label fx:id="dbConnectionBadge" text="БД PostgreSQL: проверка..." styleClass="connection-badge"/>
@@ -30,7 +28,6 @@
                 <Button text="Инициализация БД" onAction="#handleResetDatabaseDemoData" styleClass="btn-outline"/>
             </HBox>
 
-            <!-- ПАНЕЛЬ CRUD-ОПЕРАЦИЙ И ФИЛЬТРАЦИИ / ПОИСКА / СОРТИРОВКИ -->
             <VBox spacing="8" styleClass="toolbar-card">
                 <HBox spacing="10" alignment="CENTER_LEFT">
                     <Button text="+ Новый заказ" onAction="#handleAddOrder" styleClass="btn-primary"/>
@@ -46,7 +43,6 @@
                     <Button text="Обновить" onAction="#handleRefreshData" styleClass="btn-outline"/>
                 </HBox>
 
-                <!-- Строка фильтров: надписи защищены от сжатия, ComboBox сжимаются -->
                 <HBox spacing="10" alignment="CENTER_LEFT">
                     <Label text="Фильтры:" minWidth="-Infinity" styleClass="filter-label"/>
                     <ComboBox fx:id="statusFilterCombo" onAction="#handleApplySearchAndFilters" prefWidth="175" minWidth="90" promptText="Все статусы"/>
@@ -67,10 +63,8 @@
         </VBox>
     </top>
 
-    <!-- ЦЕНТРАЛЬНАЯ ЧАСТЬ: Таблица заказов (TableView) и карточка детального просмотра -->
     <center>
         <SplitPane dividerPositions="0.71" styleClass="main-split-pane">
-            <!-- Левая часть: Таблица заказов -->
             <VBox spacing="6" styleClass="table-container">
                 <TableView fx:id="ordersTable" VBox.vgrow="ALWAYS">
                     <columns>
@@ -91,7 +85,6 @@
                 </TableView>
             </VBox>
 
-            <!-- Правая часть: Детальная карточка выбранного заказа и связанного клиента -->
             <ScrollPane fitToWidth="true" styleClass="details-scroll-pane">
                 <VBox spacing="12" styleClass="details-card">
                     <Label text="Карточка заказа доставки" styleClass="section-header"/>
@@ -159,7 +152,6 @@
         </SplitPane>
     </center>
 
-    <!-- НИЖНЯЯ СТРОКА СОСТОЯНИЯ -->
     <bottom>
         <HBox spacing="15" alignment="CENTER_LEFT" styleClass="status-bar">
             <Label fx:id="statusBarLabel" text="Система готова к работе." HBox.hgrow="ALWAYS"/>

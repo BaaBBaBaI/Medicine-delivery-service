@@ -1,5 +1,9 @@
 package ru.mirea.project.controller;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
@@ -11,12 +15,8 @@ import ru.mirea.project.model.MedicineOrder;
 import ru.mirea.project.model.OrderStatus;
 import ru.mirea.project.service.MedicineOrderService;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
 /**
- * Контроллер диалогового окна смены статуса заказа по правилам жизненного цикла (OrderStatus.canTransitionTo).
+ * Контроллер диалогового окна смены статуса заказа по правилам жизненного цикла.
  */
 public class StatusChangeController {
 

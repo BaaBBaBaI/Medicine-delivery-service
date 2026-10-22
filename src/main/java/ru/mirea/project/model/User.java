@@ -5,7 +5,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 /**
- * Связанная сущность — Клиент (пользователь аптечной сети).
+ * Связанная сущность — Клиент.
  */
 public class User {
     private Long id;

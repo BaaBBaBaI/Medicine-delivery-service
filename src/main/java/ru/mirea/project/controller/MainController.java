@@ -1,5 +1,11 @@
 package ru.mirea.project.controller;
 
+import java.io.File;
+import java.net.URL;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
+
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -7,32 +13,41 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Control;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.util.StringConverter;
 import ru.mirea.project.exception.AppException;
-import ru.mirea.project.model.*;
+import ru.mirea.project.model.MedicineOrder;
+import ru.mirea.project.model.OrderStatistics;
+import ru.mirea.project.model.OrderStatus;
+import ru.mirea.project.model.PaymentMethod;
+import ru.mirea.project.model.User;
 import ru.mirea.project.service.MedicineOrderService;
 import ru.mirea.project.service.UserService;
-import ru.mirea.project.util.*;
-
-import java.io.File;
-import java.net.URL;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Locale;
+import ru.mirea.project.util.CsvExporter;
+import ru.mirea.project.util.DataExporter;
+import ru.mirea.project.util.DatabaseManager;
+import ru.mirea.project.util.DialogUtil;
+import ru.mirea.project.util.ExcelExporter;
 
 /**
  * Контроллер главного окна приложения (Main View).
  * Координирует отображение таблицы заказов, поиск, фильтрацию, сортировку, CRUD-диалоги,
- * управление клиентами, просмотр статистики и экспорт в .xlsx / .csv.
+ * управление клиентами, просмотр статистики и экспорт.
  */
 public class MainController {
 
-    // Поиск, фильтрация и сортировка
     @FXML private TextField searchField;
     @FXML private ComboBox<OrderStatus> statusFilterCombo;
     @FXML private ComboBox<PaymentMethod> paymentFilterCombo;
@@ -43,7 +58,6 @@ public class MainController {
     @FXML private ComboBox<String> sortCombo;
     @FXML private Label filterErrorLabel;
 
-    // Таблица заказов (основная сущность)
     @FXML private TableView<MedicineOrder> ordersTable;
     @FXML private TableColumn<MedicineOrder, String> colOrderNumber;
     @FXML private TableColumn<MedicineOrder, String> colClientName;
@@ -56,7 +70,6 @@ public class MainController {
     @FXML private TableColumn<MedicineOrder, String> colCreatedAt;
     @FXML private TableColumn<MedicineOrder, String> colDeliveredAt;
 
-    // Карточка просмотра выбранного заказа и связанного клиента
     @FXML private Label detailOrderNumberLabel;
     @FXML private Label detailStatusLabel;
     @FXML private Label detailAmountLabel;
@@ -68,13 +81,11 @@ public class MainController {
     @FXML private Label detailDeliveredLabel;
     @FXML private TextArea detailNotesArea;
 
-    // Сведения о связанной сущности (Клиент)
     @FXML private Label detailClientNameLabel;
     @FXML private Label detailClientPhoneLabel;
     @FXML private Label detailClientEmailLabel;
     @FXML private Label detailClientAddressLabel;
 
-    // Нижняя строка состояния и сводных индикаторов
     @FXML private Label statusBarLabel;
     @FXML private Label dbConnectionBadge;
     @FXML private Label totalShownLabel;
@@ -171,7 +182,7 @@ public class MainController {
     }
 
     private void setupFilterAndSortControls() {
-        // Фильтр 1: Статус заказа
+        //Статус заказа
         ObservableList<OrderStatus> statuses = FXCollections.observableArrayList();
         statuses.add(null);
         statuses.addAll(OrderStatus.values());
@@ -188,7 +199,7 @@ public class MainController {
             }
         });
 
-        // Фильтр 2: Способ оплаты
+        //Способ оплаты
         ObservableList<PaymentMethod> payments = FXCollections.observableArrayList();
         payments.add(null);
         payments.addAll(PaymentMethod.values());
@@ -205,7 +216,7 @@ public class MainController {
             }
         });
 
-        // Фильтр 3: Рецептурность
+        //Рецептурность
         prescriptionFilterCombo.setItems(FXCollections.observableArrayList(
                 "Все заказы",
                 "Только рецептурные (требуется рецепт)",
@@ -213,7 +224,7 @@ public class MainController {
         ));
         prescriptionFilterCombo.getSelectionModel().selectFirst();
 
-        // Фильтр 4: Связанный клиент
+        //Связанный клиент
         clientFilterCombo.setConverter(new StringConverter<>() {
             @Override
             public String toString(User user) {
@@ -226,7 +237,7 @@ public class MainController {
             }
         });
 
-        // Сортировка (минимум по 2 параметрам, реализовано 6 вариантов)
+        // Сортировка
         sortCombo.setItems(FXCollections.observableArrayList(
                 SORT_DATE_DESC,
                 SORT_DATE_ASC,

@@ -1,5 +1,10 @@
 package ru.mirea.project.controller;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -15,13 +20,8 @@ import ru.mirea.project.model.OrderStatistics;
 import ru.mirea.project.model.OrderStatus;
 import ru.mirea.project.model.PaymentMethod;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-
 /**
- * Контроллер окна аналитики и статистики (10 статистических показателей + таблицы и графики).
+ * Контроллер окна аналитики и статистики.
  */
 public class StatisticsController {
 

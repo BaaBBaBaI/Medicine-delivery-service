@@ -14,9 +14,7 @@ import java.util.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-/**
- * Модульные тесты бизнес-логики, валидации, фильтрации и расчета статистики для КР №2.
- */
+
 class MedicineOrderServiceTest {
 
     private InMemoryUserRepository userRepository;
@@ -126,7 +124,6 @@ class MedicineOrderServiceTest {
         assertThat(stats.getPrescriptionPercentage()).isEqualTo(50.0);
     }
 
-    // Вспомогательные In-Memory репозитории для изолированного тестирования сервисного слоя
     private static class InMemoryUserRepository implements UserRepository {
         private final Map<Long, User> storage = new LinkedHashMap<>();
         private long seq = 1;
