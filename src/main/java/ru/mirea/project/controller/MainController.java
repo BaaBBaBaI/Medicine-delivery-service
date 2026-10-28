@@ -22,10 +22,12 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+import javafx.util.Duration;
 import javafx.util.StringConverter;
 import ru.mirea.project.exception.AppException;
 import ru.mirea.project.model.MedicineOrder;
@@ -88,6 +90,7 @@ public class MainController {
 
     @FXML private Label statusBarLabel;
     @FXML private Label dbConnectionBadge;
+    @FXML private Tooltip dbStatusTooltip;
     @FXML private Label totalShownLabel;
 
     private MedicineOrderService orderService;
@@ -105,6 +108,12 @@ public class MainController {
 
     @FXML
     public void initialize() {
+        if (dbConnectionBadge != null) {
+            dbConnectionBadge.setText("");
+        }
+        if (dbStatusTooltip != null) {
+            dbStatusTooltip.setShowDelay(Duration.millis(150));
+        }
         setupTableColumns();
         setupFilterAndSortControls();
         setupSelectionListener();
@@ -272,15 +281,31 @@ public class MainController {
     private void checkDatabaseAndLoadData() {
         boolean connected = databaseManager.testConnection();
         if (connected) {
-            dbConnectionBadge.setText("БД PostgreSQL: подключено");
-            dbConnectionBadge.getStyleClass().removeAll("badge-Offline");
-            dbConnectionBadge.getStyleClass().add("badge-Online");
+            dbConnectionBadge.setText("");
+            dbConnectionBadge.getStyleClass().removeAll("status-dot-offline", "badge-Offline");
+            if (!dbConnectionBadge.getStyleClass().contains("status-dot-online")) {
+                dbConnectionBadge.getStyleClass().add("status-dot-online");
+            }
+            String tooltipText = "БД PostgreSQL: подключено (нажмите для повторной проверки)";
+            if (dbStatusTooltip != null) {
+                dbStatusTooltip.setText(tooltipText);
+            } else if (dbConnectionBadge.getTooltip() != null) {
+                dbConnectionBadge.getTooltip().setText(tooltipText);
+            }
             reloadClientsFilter();
             handleApplySearchAndFilters();
         } else {
-            dbConnectionBadge.setText("БД PostgreSQL: нет соединения");
-            dbConnectionBadge.getStyleClass().removeAll("badge-Online");
-            dbConnectionBadge.getStyleClass().add("badge-Offline");
+            dbConnectionBadge.setText("");
+            dbConnectionBadge.getStyleClass().removeAll("status-dot-online", "badge-Online");
+            if (!dbConnectionBadge.getStyleClass().contains("status-dot-offline")) {
+                dbConnectionBadge.getStyleClass().add("status-dot-offline");
+            }
+            String tooltipText = "Нет соединения";
+            if (dbStatusTooltip != null) {
+                dbStatusTooltip.setText(tooltipText);
+            } else if (dbConnectionBadge.getTooltip() != null) {
+                dbConnectionBadge.getTooltip().setText(tooltipText);
+            }
             statusBarLabel.setText("Не удалось подключиться к PostgreSQL. Проверьте database.properties и запущенный контейнер/сервис БД.");
         }
     }
@@ -591,7 +616,7 @@ public class MainController {
         }
 
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Сохранение выгрузки заказов — " + exporter.getFormatName());
+        fileChooser.setTitle("Сохранение выгрузки заказов - " + exporter.getFormatName());
         fileChooser.setInitialFileName(initialName);
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(extensionDescription, extensionPattern));
 
@@ -657,8 +682,8 @@ public class MainController {
     }
 
     private void populateDetailsPane(MedicineOrder order) {
-        detailOrderNumberLabel.setText(order.getOrderNumber() + " (ID: " + order.getId() + ")");
-        detailStatusLabel.setText(order.getStatus().getDisplayName() + " — " + order.getStatus().getDescription());
+        detailOrderNumberLabel.setText(order.getOrderNumber());
+        detailStatusLabel.setText(order.getStatus().getDisplayName());
         detailAmountLabel.setText(String.format(Locale.US, "%.2f ₽", order.getTotalAmount()));
         detailPaymentLabel.setText(order.getPaymentMethod().getDisplayName());
         detailPrescriptionLabel.setText(order.getPrescriptionDisplay());
@@ -674,34 +699,34 @@ public class MainController {
 
         User client = order.getClient();
         if (client != null) {
-            detailClientNameLabel.setText(client.getFullName() + " (ID: " + client.getId() + ")");
+            detailClientNameLabel.setText(client.getFullName());
             detailClientPhoneLabel.setText(client.getPhone());
             detailClientEmailLabel.setText(client.getEmail());
             detailClientAddressLabel.setText(client.getDefaultAddress());
         } else {
             detailClientNameLabel.setText("Клиент #" + order.getClientId());
-            detailClientPhoneLabel.setText("—");
-            detailClientEmailLabel.setText("—");
-            detailClientAddressLabel.setText("—");
+            detailClientPhoneLabel.setText("-");
+            detailClientEmailLabel.setText("-");
+            detailClientAddressLabel.setText("-");
         }
     }
 
     private void clearDetailsPane() {
         detailOrderNumberLabel.setText("Заказ не выбран");
-        detailStatusLabel.setText("—");
-        detailAmountLabel.setText("—");
-        detailPaymentLabel.setText("—");
-        detailPrescriptionLabel.setText("—");
-        detailAddressLabel.setText("—");
-        detailPhoneLabel.setText("—");
-        detailCreatedLabel.setText("—");
-        detailDeliveredLabel.setText("—");
+        detailStatusLabel.setText("-");
+        detailAmountLabel.setText("-");
+        detailPaymentLabel.setText("-");
+        detailPrescriptionLabel.setText("-");
+        detailAddressLabel.setText("-");
+        detailPhoneLabel.setText("-");
+        detailCreatedLabel.setText("-");
+        detailDeliveredLabel.setText("-");
         detailNotesArea.setText("Выберите строку в таблице заказов слева, чтобы просмотреть подробную карточку заказа и данные клиента.");
 
-        detailClientNameLabel.setText("—");
-        detailClientPhoneLabel.setText("—");
-        detailClientEmailLabel.setText("—");
-        detailClientAddressLabel.setText("—");
+        detailClientNameLabel.setText("-");
+        detailClientPhoneLabel.setText("-");
+        detailClientEmailLabel.setText("-");
+        detailClientAddressLabel.setText("-");
     }
 
     private void markFieldError(Control field, String message) {

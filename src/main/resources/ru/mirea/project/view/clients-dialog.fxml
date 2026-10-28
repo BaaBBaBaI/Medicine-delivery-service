@@ -75,7 +75,7 @@
 
     <bottom>
         <HBox alignment="CENTER_RIGHT" styleClass="dialog-footer">
-            <Button text="Закрыть окно" onAction="#handleClose" styleClass="btn-secondary"/>
+            <Button text="Закрыть окно" onAction="#handleClose" styleClass="btn-primary"/>
         </HBox>
     </bottom>
 </BorderPane>

@@ -23,7 +23,6 @@ public class StatusChangeController {
     @FXML private Label orderInfoLabel;
     @FXML private Label currentStatusLabel;
     @FXML private ComboBox<OrderStatus> nextStatusComboBox;
-    @FXML private Label statusDescriptionLabel;
     @FXML private Label errorLabel;
 
     private Stage dialogStage;
@@ -44,14 +43,6 @@ public class StatusChangeController {
                 return null;
             }
         });
-
-        nextStatusComboBox.getSelectionModel().selectedItemProperty().addListener((obs, oldV, newV) -> {
-            if (newV != null) {
-                statusDescriptionLabel.setText(newV.getDescription());
-            } else {
-                statusDescriptionLabel.setText("");
-            }
-        });
     }
 
     public void initDialog(Stage dialogStage, MedicineOrderService orderService, MedicineOrder order) {
@@ -61,7 +52,7 @@ public class StatusChangeController {
 
         orderInfoLabel.setText(String.format("Заказ № %s — Клиент: %s",
                 order.getOrderNumber(), order.getClientDisplayName()));
-        currentStatusLabel.setText(order.getStatus().getDisplayName() + " (" + order.getStatus().getDescription() + ")");
+        currentStatusLabel.setText(order.getStatus().getDisplayName());
 
         List<OrderStatus> allowedNext = Arrays.stream(OrderStatus.values())
                 .filter(st -> st != order.getStatus() && order.getStatus().canTransitionTo(st))

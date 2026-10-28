@@ -21,7 +21,6 @@
     <VBox spacing="6">
         <Label text="Выберите новый допустимый статус:" styleClass="form-label"/>
         <ComboBox fx:id="nextStatusComboBox" maxWidth="Infinity"/>
-        <Label fx:id="statusDescriptionLabel" styleClass="field-caption" wrapText="true"/>
     </VBox>
 
     <Pane VBox.vgrow="ALWAYS"/>

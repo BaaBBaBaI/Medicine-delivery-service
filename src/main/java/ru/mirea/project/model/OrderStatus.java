@@ -4,29 +4,23 @@ import java.util.EnumSet;
 import java.util.Set;
 
 public enum OrderStatus {
-    CREATED("Создан", "Заказ оформлен клиентом и ожидает подтверждения", true),
-    CONFIRMED("Подтвержден", "Заказ подтвержден фармацевтом, рецепты проверены", true),
-    ASSEMBLING("Собирается в аптеке", "Фармацевт комплектует медикаменты", true),
-    IN_DELIVERY("Передан курьеру", "Курьер доставляет медикаменты по адресу", true),
-    DELIVERED("Доставлен", "Заказ успешно вручен клиенту", false),
-    CANCELLED("Отменен", "Заказ аннулирован", false);
+    CREATED("Создан", true),
+    CONFIRMED("Подтвержден", true),
+    ASSEMBLING("Собирается в аптеке", true),
+    IN_DELIVERY("Передан курьеру", true),
+    DELIVERED("Доставлен", false),
+    CANCELLED("Отменен", false);
 
     private final String displayName;
-    private final String description;
     private final boolean active;
 
-    OrderStatus(String displayName, String description, boolean active) {
+    OrderStatus(String displayName, boolean active) {
         this.displayName = displayName;
-        this.description = description;
         this.active = active;
     }
 
     public String getDisplayName() {
         return displayName;
-    }
-
-    public String getDescription() {
-        return description;
     }
 
     public boolean isActive() {
