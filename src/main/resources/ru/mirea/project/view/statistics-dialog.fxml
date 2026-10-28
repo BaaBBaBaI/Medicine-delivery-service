@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="ru.mirea.project.controller.StatisticsController"
+            styleClass="dialog-root">
+
+    <top>
+        <VBox spacing="10">
+            <Label text="Аналитика и статистические показатели системы доставки лекарств" styleClass="dialog-title"/>
+
+            <!-- Блок ключевых карточек KPI (9+ показателей) -->
+            <GridPane hgap="10" vgap="10">
+                <columnConstraints>
+                    <ColumnConstraints percentWidth="33.3"/>
+                    <ColumnConstraints percentWidth="33.3"/>
+                    <ColumnConstraints percentWidth="33.4"/>
+                </columnConstraints>
+
+                <VBox styleClass="stat-card" GridPane.rowIndex="0" GridPane.columnIndex="0">
+                    <Label text="Всего заказов / Клиентов" styleClass="stat-title"/>
+                    <HBox spacing="8">
+                        <Label fx:id="totalOrdersLabel" text="0 шт." styleClass="stat-value"/>
+                        <Label text="/" styleClass="stat-value"/>
+                        <Label fx:id="totalClientsLabel" text="0 чел." styleClass="stat-value"/>
+                    </HBox>
+                </VBox>
+
+                <VBox styleClass="stat-card" GridPane.rowIndex="0" GridPane.columnIndex="1">
+                    <Label text="Выручка по доставленным" styleClass="stat-title"/>
+                    <Label fx:id="deliveredRevenueLabel" text="0.00 ₽" styleClass="stat-value-accent"/>
+                </VBox>
+
+                <VBox styleClass="stat-card" GridPane.rowIndex="0" GridPane.columnIndex="2">
+                    <Label text="Средний чек заказа" styleClass="stat-title"/>
+                    <Label fx:id="averageCheckLabel" text="0.00 ₽" styleClass="stat-value"/>
+                </VBox>
+
+                <VBox styleClass="stat-card" GridPane.rowIndex="1" GridPane.columnIndex="0">
+                    <Label text="Активные / Доставленные / Отмененные" styleClass="stat-title"/>
+                    <HBox spacing="6">
+                        <Label fx:id="activeOrdersLabel" text="0" styleClass="stat-value"/>
+                        <Label text="/" styleClass="stat-value"/>
+                        <Label fx:id="deliveredOrdersLabel" text="0" styleClass="stat-value"/>
+                        <Label text="/" styleClass="stat-value"/>
+                        <Label fx:id="cancelledOrdersLabel" text="0" styleClass="stat-value"/>
+                    </HBox>
+                </VBox>
+
+                <VBox styleClass="stat-card" GridPane.rowIndex="1" GridPane.columnIndex="1">
+                    <Label text="Мин. / Макс. сумма заказа" styleClass="stat-title"/>
+                    <Label fx:id="minMaxOrderLabel" text="0.00 ₽ / 0.00 ₽" styleClass="stat-value"/>
+                </VBox>
+
+                <VBox styleClass="stat-card" GridPane.rowIndex="1" GridPane.columnIndex="2">
+                    <Label text="Доля рецептурных заказов" styleClass="stat-title"/>
+                    <Label fx:id="prescriptionShareLabel" text="0 шт. (0.0%)" styleClass="stat-value-accent"/>
+                </VBox>
+            </GridPane>
+        </VBox>
+    </top>
+
+    <center>
+        <TabPane tabClosingPolicy="UNAVAILABLE" styleClass="stats-tabs">
+            <tabs>
+                <Tab text="Табличное распределение по статусам и оплате">
+                    <HBox spacing="12" styleClass="tab-content-box">
+                        <VBox spacing="6" HBox.hgrow="ALWAYS">
+                            <Label text="Распределение заказов по статусам:" styleClass="section-header"/>
+                            <TableView fx:id="statusBreakdownTable" VBox.vgrow="ALWAYS">
+                                <columns>
+                                    <TableColumn fx:id="colStatusName" text="Статус заказа" prefWidth="220"/>
+                                    <TableColumn fx:id="colStatusCount" text="Количество и доля" prefWidth="180"/>
+                                </columns>
+                            </TableView>
+                        </VBox>
+
+                        <VBox spacing="6" HBox.hgrow="ALWAYS">
+                            <Label text="Распределение по способам оплаты:" styleClass="section-header"/>
+                            <TableView fx:id="paymentBreakdownTable" VBox.vgrow="ALWAYS">
+                                <columns>
+                                    <TableColumn fx:id="colPaymentName" text="Способ оплаты" prefWidth="240"/>
+                                    <TableColumn fx:id="colPaymentCount" text="Количество и доля" prefWidth="180"/>
+                                </columns>
+                            </TableView>
+                        </VBox>
+                    </HBox>
+                </Tab>
+
+                <Tab text="Графическая визуализация (диаграммы)">
+                    <HBox spacing="12" styleClass="tab-content-box">
+                        <PieChart fx:id="statusPieChart" title="Доли заказов по статусам" HBox.hgrow="ALWAYS"/>
+                        <BarChart fx:id="paymentBarChart" title="Заказы по способам оплаты" HBox.hgrow="ALWAYS">
+                            <xAxis>
+                                <CategoryAxis label="Способ оплаты"/>
+                            </xAxis>
+                            <yAxis>
+                                <NumberAxis label="Количество заказов"/>
+                            </yAxis>
+                        </BarChart>
+                    </HBox>
+                </Tab>
+            </tabs>
+        </TabPane>
+    </center>
+
+    <bottom>
+        <HBox alignment="CENTER_RIGHT" styleClass="dialog-footer">
+            <Button text="Закрыть" onAction="#handleClose" styleClass="btn-primary"/>
+        </HBox>
+    </bottom>
+</BorderPane>

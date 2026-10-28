@@ -4,9 +4,6 @@ import ru.mirea.project.model.User;
 
 import java.util.List;
 
-/**
- * Интерфейс сервиса управления клиентами/пользователями.
- */
 public interface UserService {
     User registerUser(User user);
     User getUserById(Long id);

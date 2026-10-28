@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="ru.mirea.project.controller.OrderFormController"
+      spacing="14" styleClass="dialog-root">
+
+    <Label fx:id="formTitleLabel" text="Оформление заказа доставки лекарств" styleClass="dialog-title"/>
+
+    <Label fx:id="errorBannerLabel" visible="false" managed="false" wrapText="true" styleClass="error-banner"/>
+
+    <GridPane hgap="12" vgap="12" VBox.vgrow="ALWAYS">
+        <columnConstraints>
+            <ColumnConstraints minWidth="165" prefWidth="175"/>
+            <ColumnConstraints hgrow="ALWAYS"/>
+        </columnConstraints>
+
+        <Label text="Номер заказа:" GridPane.rowIndex="0" GridPane.columnIndex="0" styleClass="form-label"/>
+        <TextField fx:id="orderNumberField" GridPane.rowIndex="0" GridPane.columnIndex="1"
+                   promptText="Оставьте пустым для автогенерации (MED-2026-XXXX)"/>
+
+        <Label text="Клиент-заказчик *:" GridPane.rowIndex="1" GridPane.columnIndex="0" styleClass="form-label"/>
+        <HBox spacing="8" GridPane.rowIndex="1" GridPane.columnIndex="1">
+            <ComboBox fx:id="clientComboBox" maxWidth="Infinity" HBox.hgrow="ALWAYS" promptText="Выберите клиента из списка"/>
+            <Button text="Подставить адрес/тел." onAction="#handleUseClientDefaults" styleClass="btn-outline"/>
+        </HBox>
+
+        <Label text="Адрес доставки *:" GridPane.rowIndex="2" GridPane.columnIndex="0" styleClass="form-label"/>
+        <TextField fx:id="deliveryAddressField" GridPane.rowIndex="2" GridPane.columnIndex="1"
+                   promptText="Например: г. Москва, пр-т Вернадского, д. 78, кв. 101"/>
+
+        <Label text="Контактный телефон *:" GridPane.rowIndex="3" GridPane.columnIndex="0" styleClass="form-label"/>
+        <TextField fx:id="contactPhoneField" GridPane.rowIndex="3" GridPane.columnIndex="1"
+                   promptText="Например: +7 (916) 111-22-33"/>
+
+        <Label text="Сумма заказа (₽) *:" GridPane.rowIndex="4" GridPane.columnIndex="0" styleClass="form-label"/>
+        <TextField fx:id="totalAmountField" GridPane.rowIndex="4" GridPane.columnIndex="1"
+                   promptText="Допустимый диапазон: от 0.01 до 100000.00"/>
+
+        <Label text="Способ оплаты *:" GridPane.rowIndex="5" GridPane.columnIndex="0" styleClass="form-label"/>
+        <ComboBox fx:id="paymentMethodComboBox" GridPane.rowIndex="5" GridPane.columnIndex="1" maxWidth="Infinity"/>
+
+        <Label text="Рецептурный контроль:" GridPane.rowIndex="6" GridPane.columnIndex="0" styleClass="form-label"/>
+        <CheckBox fx:id="prescriptionRequiredCheckBox" GridPane.rowIndex="6" GridPane.columnIndex="1"
+                  text="В заказе присутствуют рецептурные лекарственные препараты"/>
+
+        <Label text="Номер рецепта врача:" GridPane.rowIndex="7" GridPane.columnIndex="0" styleClass="form-label"/>
+        <TextField fx:id="prescriptionNumberField" GridPane.rowIndex="7" GridPane.columnIndex="1"
+                   promptText="Обязателен для рецептурных препаратов (например, RX-77-90214)"/>
+
+        <Label text="Состав и примечание:" GridPane.rowIndex="8" GridPane.columnIndex="0" styleClass="form-label"/>
+        <TextArea fx:id="deliveryNotesArea" GridPane.rowIndex="8" GridPane.columnIndex="1"
+                  prefRowCount="4" wrapText="true"
+                  promptText="Перечень лекарственных средств, пожелания по доставке, код домофона..."/>
+    </GridPane>
+
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Button text="Отмена" onAction="#handleCancel" styleClass="btn-outline"/>
+        <Button text="Сохранить заказ" onAction="#handleSave" defaultButton="true" styleClass="btn-primary"/>
+    </HBox>
+</VBox>

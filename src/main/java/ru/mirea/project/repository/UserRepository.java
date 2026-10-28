@@ -5,9 +5,6 @@ import ru.mirea.project.model.User;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Интерфейс репозитория для работы с клиентами/пользователями.
- */
 public interface UserRepository extends CrudRepository<User, Long> {
     Optional<User> findByPhone(String phone);
     Optional<User> findByEmail(String email);

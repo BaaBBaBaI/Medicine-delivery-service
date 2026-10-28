@@ -13,12 +13,15 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
- * Менеджер подключения к базе данных (Singleton-утилита).
- * Управляет жизненным циклом соединений через JDBC, читает настройки из application.properties.
+ * Менеджер подключения к базе данных PostgreSQL через JDBC (Singleton).
+ * Читает параметры подключения из src/main/resources/database.properties (и application.properties).
  */
 public class DatabaseManager {
+    private static final Logger log = Logger.getLogger(DatabaseManager.class.getName());
     private static volatile DatabaseManager instance;
 
     private String url;
@@ -43,33 +46,46 @@ public class DatabaseManager {
 
     private void loadProperties() {
         Properties props = new Properties();
-        // 1. Попытка загрузить из classpath
-        try (InputStream in = getClass().getClassLoader().getResourceAsStream("application.properties")) {
-            if (in != null) {
-                props.load(in);
-            }
-        } catch (Exception ignored) {}
 
-        // 2. Чтение из локального файла (если изменен в проекте или рядом с jar)
-        File localFile = new File("application.properties");
-        if (!localFile.exists()) {
-            localFile = new File("src/main/resources/application.properties");
-        }
-        if (localFile.exists()) {
-            try (InputStream in = new FileInputStream(localFile)) {
-                props.load(in);
-            } catch (Exception ignored) {}
-        }
+        // 1. Загрузка из classpath: сначала application.properties, затем приоритетный database.properties
+        loadFromClasspath(props, "application.properties");
+        loadFromClasspath(props, "database.properties");
+
+        // 2. Чтение из локальных файлов при наличии
+        loadFromFile(props, new File("src/main/resources/application.properties"));
+        loadFromFile(props, new File("src/main/resources/database.properties"));
+        loadFromFile(props, new File("application.properties"));
+        loadFromFile(props, new File("database.properties"));
 
         this.driver = System.getProperty("db.driver", props.getProperty("db.driver", "org.postgresql.Driver"));
-        this.url = System.getProperty("db.url", props.getProperty("db.url", "jdbc:postgresql://localhost:5432/pharmacy_db"));
-        this.user = System.getProperty("db.user", props.getProperty("db.user", "postgres"));
-        this.password = System.getProperty("db.password", props.getProperty("db.password", "postgres"));
+        this.url = System.getProperty("db.url", props.getProperty("db.url"));
+        this.user = System.getProperty("db.user", props.getProperty("db.user"));
+        this.password = System.getProperty("db.password", props.getProperty("db.password"));
 
         try {
             Class.forName(this.driver);
         } catch (Exception e) {
-            throw new DatabaseException("Ошибка загрузки конфигурации базы данных: " + e.getMessage(), e);
+            throw new DatabaseException("Ошибка загрузки JDBC-драйвера PostgreSQL: " + e.getMessage(), e);
+        }
+    }
+
+    private void loadFromClasspath(Properties props, String resourceName) {
+        try (InputStream in = getClass().getClassLoader().getResourceAsStream(resourceName)) {
+            if (in != null) {
+                props.load(new InputStreamReader(in, StandardCharsets.UTF_8));
+            }
+        } catch (Exception e) {
+            log.log(Level.WARNING, "Не удалось прочитать ресурс " + resourceName, e);
+        }
+    }
+
+    private void loadFromFile(Properties props, File file) {
+        if (file.exists() && file.isFile()) {
+            try (InputStream in = new FileInputStream(file)) {
+                props.load(new InputStreamReader(in, StandardCharsets.UTF_8));
+            } catch (Exception e) {
+                log.log(Level.WARNING, "Не удалось прочитать файл " + file.getPath(), e);
+            }
         }
     }
 
@@ -90,18 +106,24 @@ public class DatabaseManager {
         try (Connection adminConn = DriverManager.getConnection(adminUrl, user, password);
              Statement stmt = adminConn.createStatement()) {
             stmt.executeUpdate("CREATE DATABASE pharmacy_db");
-            System.out.println("ℹ️  База данных 'pharmacy_db' была автоматически создана.");
-        } catch (Exception ignored) {}
+            log.info("База данных 'pharmacy_db' была автоматически создана.");
+        } catch (Exception e) {
+            log.log(Level.FINE, "Автосоздание БД pharmacy_db пропущено: " + e.getMessage());
+        }
     }
 
     public boolean testConnection() {
         try (Connection conn = getConnection()) {
             return conn.isValid(2);
         } catch (Exception e) {
-            System.out.println("   [Диагностика] URL: " + url + ", Пользователь: " + user);
-            System.out.println("   [Диагностика] Детали ошибки: " + e.getMessage());
+            log.warning("Не удалось подключиться к PostgreSQL (" + url + "): " + e.getMessage());
             return false;
         }
+    }
+
+    public void initializeDatabaseWithDemoData() {
+        executeScript("schema.sql");
+        executeScript("data.sql");
     }
 
     public void executeScript(String resourcePath) {
@@ -117,7 +139,6 @@ public class DatabaseManager {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     String trimmed = line.trim();
-                    // Пропуск комментариев
                     if (trimmed.startsWith("--") || trimmed.isEmpty()) {
                         continue;
                     }

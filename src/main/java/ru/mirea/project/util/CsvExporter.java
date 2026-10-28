@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Locale;
 
 public class CsvExporter implements DataExporter {
 
@@ -25,6 +26,7 @@ public class CsvExporter implements DataExporter {
              OutputStreamWriter osw = new OutputStreamWriter(fos, StandardCharsets.UTF_8);
              BufferedWriter writer = new BufferedWriter(osw)) {
 
+            // UTF-8 BOM для корректного открытия кириллицы в Excel
             fos.write(0xEF);
             fos.write(0xBB);
             fos.write(0xBF);
@@ -44,7 +46,7 @@ public class CsvExporter implements DataExporter {
                 sb.append(escapeCsv(clientName)).append(";");
                 sb.append(escapeCsv(order.getContactPhone())).append(";");
                 sb.append(escapeCsv(order.getDeliveryAddress())).append(";");
-                sb.append(String.format(java.util.Locale.US, "%.2f", order.getTotalAmount())).append(";");
+                sb.append(String.format(Locale.US, "%.2f", order.getTotalAmount())).append(";");
                 sb.append(escapeCsv(order.getStatus().getDisplayName())).append(";");
                 sb.append(escapeCsv(order.getPaymentMethod().getDisplayName())).append(";");
                 sb.append(order.isPrescriptionRequired() ? "Да" : "Нет").append(";");

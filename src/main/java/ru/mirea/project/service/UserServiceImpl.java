@@ -7,9 +7,6 @@ import ru.mirea.project.repository.UserRepository;
 
 import java.util.List;
 
-/**
- * Реализация бизнес-логики работы с пользователями/клиентами.
- */
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
@@ -22,15 +19,18 @@ public class UserServiceImpl implements UserService {
     public User registerUser(User user) {
         validateUser(user);
 
-        // Проверка уникальности телефон
-        userRepository.findByPhone(user.getPhone()).ifPresent(existing -> {
+        userRepository.findByPhone(user.getPhone().trim()).ifPresent(existing -> {
             throw new BusinessException("Клиент с номером телефона '" + user.getPhone() + "' уже зарегистрирован.");
         });
 
-        // Проверка уникальности email
-        userRepository.findByEmail(user.getEmail()).ifPresent(existing -> {
+        userRepository.findByEmail(user.getEmail().trim()).ifPresent(existing -> {
             throw new BusinessException("Клиент с email '" + user.getEmail() + "' уже зарегистрирован.");
         });
+
+        user.setFullName(user.getFullName().trim());
+        user.setPhone(user.getPhone().trim());
+        user.setEmail(user.getEmail().trim());
+        user.setDefaultAddress(user.getDefaultAddress().trim());
 
         return userRepository.save(user);
     }
@@ -61,22 +61,24 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException("ID клиента не должен превышать 1 000 000 000.");
         }
         validateUser(user);
+        getUserById(user.getId());
 
-        User existing = getUserById(user.getId());
-
-        // collision check phone
-        userRepository.findByPhone(user.getPhone()).ifPresent(other -> {
+        userRepository.findByPhone(user.getPhone().trim()).ifPresent(other -> {
             if (!other.getId().equals(user.getId())) {
                 throw new BusinessException("Телефон '" + user.getPhone() + "' уже используется другим клиентом.");
             }
         });
 
-        // collision check email
-        userRepository.findByEmail(user.getEmail()).ifPresent(other -> {
+        userRepository.findByEmail(user.getEmail().trim()).ifPresent(other -> {
             if (!other.getId().equals(user.getId())) {
                 throw new BusinessException("Email '" + user.getEmail() + "' уже используется другим клиентом.");
             }
         });
+
+        user.setFullName(user.getFullName().trim());
+        user.setPhone(user.getPhone().trim());
+        user.setEmail(user.getEmail().trim());
+        user.setDefaultAddress(user.getDefaultAddress().trim());
 
         boolean updated = userRepository.update(user);
         if (!updated) {
@@ -90,13 +92,10 @@ public class UserServiceImpl implements UserService {
         if (id == null || id <= 0) {
             throw new BusinessException("ID клиента должен быть положительным числом.");
         }
-        if (id > 1_000_000_000L) {
-            throw new BusinessException("ID клиента не должен превышать 1 000 000 000.");
-        }
-        getUserById(id); 
+        getUserById(id);
         boolean deleted = userRepository.deleteById(id);
         if (!deleted) {
-            throw new BusinessException("Не удалось удалить клиента ID=" + id + ". Возможно, у него есть активные заказы.");
+            throw new BusinessException("Не удалось удалить клиента ID=" + id + ". Возможно, за ним закреплены заказы.");
         }
     }
 
@@ -106,38 +105,38 @@ public class UserServiceImpl implements UserService {
             return getAllUsers();
         }
         if (name.trim().length() > 150) {
-            throw new BusinessException("Поисковый запрос по ФИО не должен превышать 150 символов.");
+            throw new BusinessException("Поисковый запрос не должен превышать 150 символов.");
         }
         return userRepository.searchByName(name.trim());
     }
 
     private void validateUser(User user) {
         if (user == null) {
-            throw new BusinessException("Объект клиента не может быть null.");
+            throw new BusinessException("Объект клиента не может быть пустым.");
         }
         if (user.getFullName() == null || user.getFullName().trim().length() < 2) {
-            throw new BusinessException("ФИО клиента обязательно и должно содержать не менее 2 символов.");
+            throw new BusinessException("Поле «ФИО клиента» обязательно и должно содержать не менее 2 символов.");
         }
         if (user.getFullName().trim().length() > 150) {
-            throw new BusinessException("ФИО клиента не должно превышать 150 символов.");
+            throw new BusinessException("Поле «ФИО клиента» не должно превышать 150 символов.");
         }
         if (user.getPhone() == null || user.getPhone().trim().length() < 6) {
-            throw new BusinessException("Контактный телефон обязателен (не менее 6 символов).");
+            throw new BusinessException("Поле «Контактный телефон» обязательно (не менее 6 символов).");
         }
         if (user.getPhone().trim().length() > 25) {
-            throw new BusinessException("Контактный телефон не должен превышать 25 символов.");
+            throw new BusinessException("Поле «Контактный телефон» не должно превышать 25 символов.");
         }
         if (user.getEmail() == null || !user.getEmail().contains("@") || user.getEmail().trim().length() < 5) {
-            throw new BusinessException("Указан некорректный адрес электронной почты: " + user.getEmail());
+            throw new BusinessException("Поле «Email» заполнено некорректно: укажите адрес электронной почты с символом '@'.");
         }
         if (user.getEmail().trim().length() > 100) {
-            throw new BusinessException("Email не должен превышать 100 символов.");
+            throw new BusinessException("Поле «Email» не должно превышать 100 символов.");
         }
         if (user.getDefaultAddress() == null || user.getDefaultAddress().trim().length() < 5) {
-            throw new BusinessException("Адрес доставки обязателен (не менее 5 символов).");
+            throw new BusinessException("Поле «Адрес по умолчанию» обязательно (не менее 5 символов).");
         }
         if (user.getDefaultAddress().trim().length() > 255) {
-            throw new BusinessException("Адрес доставки не должен превышать 255 символов.");
+            throw new BusinessException("Поле «Адрес по умолчанию» не должно превышать 255 символов.");
         }
     }
 }

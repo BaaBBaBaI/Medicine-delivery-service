@@ -82,9 +82,13 @@ public class MedicineOrder {
 
     public void setClient(User client) {
         this.client = client;
-        if (client != null && this.clientId == null) {
+        if (client != null) {
             this.clientId = client.getId();
         }
+    }
+
+    public String getClientDisplayName() {
+        return client != null ? client.getFullName() : ("Клиент #" + clientId);
     }
 
     public String getDeliveryAddress() {
@@ -143,6 +147,15 @@ public class MedicineOrder {
         this.prescriptionNumber = prescriptionNumber;
     }
 
+    public String getPrescriptionDisplay() {
+        if (!prescriptionRequired) {
+            return "Нет";
+        }
+        return (prescriptionNumber != null && !prescriptionNumber.isBlank())
+                ? "Да (" + prescriptionNumber + ")"
+                : "Да";
+    }
+
     public String getDeliveryNotes() {
         return deliveryNotes;
     }
@@ -159,12 +172,20 @@ public class MedicineOrder {
         this.createdAt = createdAt;
     }
 
+    public String getCreatedAtFormatted() {
+        return createdAt != null ? createdAt.format(DATE_FORMATTER) : "—";
+    }
+
     public LocalDateTime getDeliveredAt() {
         return deliveredAt;
     }
 
     public void setDeliveredAt(LocalDateTime deliveredAt) {
         this.deliveredAt = deliveredAt;
+    }
+
+    public String getDeliveredAtFormatted() {
+        return deliveredAt != null ? deliveredAt.format(DATE_FORMATTER) : "—";
     }
 
     @Override
@@ -182,10 +203,7 @@ public class MedicineOrder {
 
     @Override
     public String toString() {
-        String clientInfo = (client != null) ? client.getFullName() : ("Клиент #" + clientId);
-        return String.format("Заказ[%d | %s] Клиент: %s | Сумма: %.2f руб. | Статус: %s | Рецепт: %s | Создан: %s",
-                id, orderNumber, clientInfo, totalAmount, status.getDisplayName(),
-                prescriptionRequired ? ("ДА (" + prescriptionNumber + ")") : "НЕТ",
-                createdAt != null ? createdAt.format(DATE_FORMATTER) : "—");
+        return String.format("Заказ[%d | %s] Клиент: %s | Сумма: %.2f руб. | Статус: %s",
+                id, orderNumber, getClientDisplayName(), totalAmount, status.getDisplayName());
     }
 }

@@ -1,4 +1,3 @@
-
 TRUNCATE TABLE medicine_orders, users RESTART IDENTITY CASCADE;
 
 INSERT INTO users (full_name, phone, email, default_address, registered_at) VALUES
@@ -14,7 +13,6 @@ INSERT INTO medicine_orders (
     total_amount, status, payment_method, prescription_required, 
     prescription_number, delivery_notes, created_at, delivered_at
 ) VALUES
-
 ('MED-2026-001', 1, 'г. Москва, пр-т Вернадского, д. 78, кв. 101', '+7 (916) 111-22-33', 
  1850.50, 'DELIVERED', 'CARD_ONLINE', FALSE, NULL, 
  'Парацетамол, Витамин C, Спрей для носа. Доставить до двери.', '2026-09-12 09:15:00', '2026-09-12 11:30:00'),

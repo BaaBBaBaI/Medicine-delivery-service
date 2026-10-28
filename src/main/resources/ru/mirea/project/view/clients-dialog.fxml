@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="ru.mirea.project.controller.ClientsController"
+            styleClass="dialog-root">
+
+    <top>
+        <VBox spacing="10">
+            <HBox alignment="CENTER_LEFT" spacing="12">
+                <Label text="Справочник клиентов аптечной сети (связанная сущность User)" styleClass="dialog-title" HBox.hgrow="ALWAYS"/>
+                <TextField fx:id="searchClientField" onAction="#handleSearchClients" promptText="Поиск по ФИО, телефону или email..." prefWidth="260"/>
+                <Button text="Найти" onAction="#handleSearchClients" styleClass="btn-primary"/>
+                <Button text="Все клиенты" onAction="#handleResetClientSearch" styleClass="btn-outline"/>
+            </HBox>
+        </VBox>
+    </top>
+
+    <center>
+        <SplitPane dividerPositions="0.62" styleClass="main-split-pane">
+            <VBox spacing="8">
+                <TableView fx:id="clientsTable" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="colId" text="ID" prefWidth="50"/>
+                        <TableColumn fx:id="colFullName" text="ФИО клиента" prefWidth="185"/>
+                        <TableColumn fx:id="colPhone" text="Телефон" prefWidth="135"/>
+                        <TableColumn fx:id="colEmail" text="Email" prefWidth="165"/>
+                        <TableColumn fx:id="colAddress" text="Адрес по умолчанию" prefWidth="220"/>
+                        <TableColumn fx:id="colRegisteredAt" text="Регистрация" prefWidth="120"/>
+                    </columns>
+                </TableView>
+            </VBox>
+
+            <VBox spacing="10" styleClass="details-card">
+                <HBox alignment="CENTER_LEFT" spacing="8">
+                    <Label fx:id="formModeLabel" text="Карточка клиента" styleClass="section-header" HBox.hgrow="ALWAYS"/>
+                    <Button text="+ Новый клиент" onAction="#handleNewClientMode" styleClass="btn-outline"/>
+                </HBox>
+
+                <Label fx:id="clientErrorLabel" visible="false" managed="false" wrapText="true" styleClass="error-banner"/>
+
+                <GridPane hgap="8" vgap="8">
+                    <columnConstraints>
+                        <ColumnConstraints minWidth="115" prefWidth="120"/>
+                        <ColumnConstraints hgrow="ALWAYS"/>
+                    </columnConstraints>
+
+                    <Label text="ФИО *:" GridPane.rowIndex="0" GridPane.columnIndex="0" styleClass="form-label"/>
+                    <TextField fx:id="fullNameField" GridPane.rowIndex="0" GridPane.columnIndex="1" promptText="Иванов Иван Иванович"/>
+
+                    <Label text="Телефон *:" GridPane.rowIndex="1" GridPane.columnIndex="0" styleClass="form-label"/>
+                    <TextField fx:id="phoneField" GridPane.rowIndex="1" GridPane.columnIndex="1" promptText="+7 (999) 000-00-00"/>
+
+                    <Label text="Email *:" GridPane.rowIndex="2" GridPane.columnIndex="0" styleClass="form-label"/>
+                    <TextField fx:id="emailField" GridPane.rowIndex="2" GridPane.columnIndex="1" promptText="client@example.ru"/>
+
+                    <Label text="Адрес *:" GridPane.rowIndex="3" GridPane.columnIndex="0" styleClass="form-label"/>
+                    <TextField fx:id="addressField" GridPane.rowIndex="3" GridPane.columnIndex="1" promptText="г. Москва, ул. ..."/>
+                </GridPane>
+
+                <HBox spacing="8" alignment="CENTER_RIGHT">
+                    <Button text="Удалить клиента" onAction="#handleDeleteClient" styleClass="btn-danger"/>
+                    <Button text="Сохранить клиента" onAction="#handleSaveClient" styleClass="btn-primary"/>
+                </HBox>
+
+                <Separator/>
+                <Label text="Заказы выбранного клиента:" styleClass="section-header"/>
+                <ListView fx:id="clientOrdersListView" VBox.vgrow="ALWAYS"/>
+            </VBox>
+        </SplitPane>
+    </center>
+
+    <bottom>
+        <HBox alignment="CENTER_RIGHT" styleClass="dialog-footer">
+            <Button text="Закрыть окно" onAction="#handleClose" styleClass="btn-primary"/>
+        </HBox>
+    </bottom>
+</BorderPane>

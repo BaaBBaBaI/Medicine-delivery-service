@@ -10,9 +10,6 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * Реализация сервиса заказов доставки лекарств.
- */
 public class MedicineOrderServiceImpl implements MedicineOrderService {
 
     private final MedicineOrderRepository orderRepository;
@@ -23,39 +20,43 @@ public class MedicineOrderServiceImpl implements MedicineOrderService {
         this.userRepository = userRepository;
     }
 
-
     @Override
     public MedicineOrder createOrder(MedicineOrder order) {
         if (order == null) {
-            throw new BusinessException("Заказ не может быть null.");
+            throw new BusinessException("Заказ не может быть пустым.");
         }
 
-     
         if (order.getClientId() == null) {
-            throw new BusinessException("Не указан ID клиента для оформления заказа.");
+            throw new BusinessException("Необходимо выбрать клиента-заказчика из списка.");
         }
         User client = userRepository.findById(order.getClientId())
                 .orElseThrow(() -> new BusinessException("Нельзя создать заказ: клиент с ID=" + order.getClientId() + " не найден в базе данных."));
         order.setClient(client);
 
-
         if (order.getOrderNumber() == null || order.getOrderNumber().trim().isEmpty()) {
             order.setOrderNumber(generateOrderNumber());
+        } else {
+            order.setOrderNumber(order.getOrderNumber().trim());
+            if (order.getOrderNumber().length() > 30) {
+                throw new BusinessException("Номер заказа не должен превышать 30 символов.");
+            }
         }
 
-     
         orderRepository.findByOrderNumber(order.getOrderNumber()).ifPresent(existing -> {
             throw new BusinessException("Заказ с номером '" + order.getOrderNumber() + "' уже существует в системе.");
         });
 
-        
         validateAddressAndPhone(order.getDeliveryAddress(), order.getContactPhone());
-
-       
         validateAmount(order.getTotalAmount());
-
         validatePrescription(order.isPrescriptionRequired(), order.getPrescriptionNumber());
 
+        if (order.getPaymentMethod() == null) {
+            throw new BusinessException("Необходимо выбрать способ оплаты.");
+        }
+
+        order.setDeliveryAddress(order.getDeliveryAddress().trim());
+        order.setContactPhone(order.getContactPhone().trim());
+        order.setPrescriptionNumber(order.isPrescriptionRequired() ? order.getPrescriptionNumber().trim() : null);
         order.setStatus(OrderStatus.CREATED);
         order.setCreatedAt(LocalDateTime.now());
         order.setDeliveredAt(null);
@@ -91,26 +92,39 @@ public class MedicineOrderServiceImpl implements MedicineOrderService {
 
     @Override
     public MedicineOrder updateOrder(MedicineOrder order) {
-        if (order.getId() == null) {
-            throw new BusinessException("ID заказа обязателен для обновления.");
+        if (order == null || order.getId() == null) {
+            throw new BusinessException("ID заказа обязателен для редактирования.");
         }
 
         MedicineOrder existing = getOrderById(order.getId());
 
         if (existing.getStatus().isFinal()) {
-            throw new BusinessException("Нельзя изменять заказ в финальном статусе: " + existing.getStatus().getDisplayName());
+            throw new BusinessException("Нельзя редактировать заказ в финальном статусе «"
+                    + existing.getStatus().getDisplayName() + "».");
         }
+
+        if (order.getClientId() == null) {
+            throw new BusinessException("Необходимо выбрать клиента-заказчика из списка.");
+        }
+        User client = userRepository.findById(order.getClientId())
+                .orElseThrow(() -> new BusinessException("Клиент с ID=" + order.getClientId() + " не найден в базе данных."));
 
         validateAddressAndPhone(order.getDeliveryAddress(), order.getContactPhone());
         validateAmount(order.getTotalAmount());
         validatePrescription(order.isPrescriptionRequired(), order.getPrescriptionNumber());
 
-        existing.setDeliveryAddress(order.getDeliveryAddress());
-        existing.setContactPhone(order.getContactPhone());
+        if (order.getPaymentMethod() == null) {
+            throw new BusinessException("Необходимо выбрать способ оплаты.");
+        }
+
+        existing.setClientId(client.getId());
+        existing.setClient(client);
+        existing.setDeliveryAddress(order.getDeliveryAddress().trim());
+        existing.setContactPhone(order.getContactPhone().trim());
         existing.setTotalAmount(order.getTotalAmount());
         existing.setPaymentMethod(order.getPaymentMethod());
         existing.setPrescriptionRequired(order.isPrescriptionRequired());
-        existing.setPrescriptionNumber(order.getPrescriptionNumber());
+        existing.setPrescriptionNumber(order.isPrescriptionRequired() ? order.getPrescriptionNumber().trim() : null);
         existing.setDeliveryNotes(order.getDeliveryNotes());
 
         boolean updated = orderRepository.update(existing);
@@ -125,8 +139,8 @@ public class MedicineOrderServiceImpl implements MedicineOrderService {
         MedicineOrder order = getOrderById(id);
 
         if (order.getStatus() == OrderStatus.IN_DELIVERY || order.getStatus() == OrderStatus.ASSEMBLING) {
-            throw new BusinessException("Запрещено удалять заказ в процессе комплектации или доставки (Статус: " 
-                    + order.getStatus().getDisplayName() + "). Сначала отмените его.");
+            throw new BusinessException("Запрещено удалять заказ в процессе комплектации или доставки (текущий статус: «"
+                    + order.getStatus().getDisplayName() + "»). Сначала переведите его в статус «Отменен».");
         }
 
         boolean deleted = orderRepository.deleteById(id);
@@ -137,6 +151,9 @@ public class MedicineOrderServiceImpl implements MedicineOrderService {
 
     @Override
     public MedicineOrder changeOrderStatus(Long id, OrderStatus newStatus) {
+        if (newStatus == null) {
+            throw new BusinessException("Необходимо указать новый статус заказа.");
+        }
         MedicineOrder order = getOrderById(id);
         OrderStatus currentStatus = order.getStatus();
 
@@ -146,13 +163,13 @@ public class MedicineOrderServiceImpl implements MedicineOrderService {
 
         if (!currentStatus.canTransitionTo(newStatus)) {
             throw new BusinessException(String.format(
-                    "Недопустимый переход между статусами: невозможно перевести заказ из '%s' в '%s'.",
+                    "Недопустимый переход между статусами: невозможно перевести заказ из «%s» в «%s».",
                     currentStatus.getDisplayName(), newStatus.getDisplayName()));
         }
 
         if (order.isPrescriptionRequired() && (newStatus == OrderStatus.CONFIRMED || newStatus == OrderStatus.IN_DELIVERY)) {
             if (order.getPrescriptionNumber() == null || order.getPrescriptionNumber().trim().isEmpty()) {
-                throw new BusinessException("Невозможно подтвердить или отправить рецептурный заказ без номера рецепта!");
+                throw new BusinessException("Невозможно подтвердить или отправить рецептурный заказ без указанного номера рецепта.");
             }
         }
 
@@ -167,7 +184,6 @@ public class MedicineOrderServiceImpl implements MedicineOrderService {
         }
         return order;
     }
-
 
     @Override
     public List<MedicineOrder> searchByKeyword(String keyword) {
@@ -202,7 +218,6 @@ public class MedicineOrderServiceImpl implements MedicineOrderService {
                 .collect(Collectors.toList());
     }
 
-
     @Override
     public List<MedicineOrder> filterByStatus(OrderStatus status) {
         if (status == null) {
@@ -222,6 +237,9 @@ public class MedicineOrderServiceImpl implements MedicineOrderService {
 
     @Override
     public List<MedicineOrder> filterByAmountRange(double minAmount, double maxAmount) {
+        if (minAmount < 0 || maxAmount < minAmount) {
+            throw new BusinessException("Указан некорректный диапазон суммы заказа.");
+        }
         return getAllOrders().stream()
                 .filter(o -> o.getTotalAmount() >= minAmount && o.getTotalAmount() <= maxAmount)
                 .collect(Collectors.toList());
@@ -237,6 +255,41 @@ public class MedicineOrderServiceImpl implements MedicineOrderService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<MedicineOrder> findOrdersWithFilters(
+            String keyword,
+            OrderStatus status,
+            PaymentMethod paymentMethod,
+            Boolean prescriptionRequired,
+            Long clientId,
+            Double minAmount,
+            Double maxAmount,
+            Comparator<MedicineOrder> sortComparator
+    ) {
+        if (minAmount != null && minAmount < 0) {
+            throw new BusinessException("Минимальная сумма фильтра не может быть отрицательной.");
+        }
+        if (maxAmount != null && maxAmount < 0) {
+            throw new BusinessException("Максимальная сумма фильтра не может быть отрицательной.");
+        }
+        if (minAmount != null && maxAmount != null && minAmount > maxAmount) {
+            throw new BusinessException("Минимальная сумма фильтра не может превышать максимальную сумму.");
+        }
+
+        List<MedicineOrder> source = (keyword != null && !keyword.trim().isEmpty())
+                ? orderRepository.searchByKeyword(keyword.trim())
+                : orderRepository.findAll();
+
+        return source.stream()
+                .filter(o -> status == null || o.getStatus() == status)
+                .filter(o -> paymentMethod == null || o.getPaymentMethod() == paymentMethod)
+                .filter(o -> prescriptionRequired == null || o.isPrescriptionRequired() == prescriptionRequired)
+                .filter(o -> clientId == null || Objects.equals(o.getClientId(), clientId))
+                .filter(o -> minAmount == null || o.getTotalAmount() >= minAmount)
+                .filter(o -> maxAmount == null || o.getTotalAmount() <= maxAmount)
+                .sorted(sortComparator != null ? sortComparator : Comparator.comparing(MedicineOrder::getId))
+                .collect(Collectors.toList());
+    }
 
     @Override
     public List<MedicineOrder> getSortedOrders(Comparator<MedicineOrder> comparator) {
@@ -244,7 +297,6 @@ public class MedicineOrderServiceImpl implements MedicineOrderService {
                 .sorted(comparator)
                 .collect(Collectors.toList());
     }
-
 
     @Override
     public OrderStatistics calculateStatistics() {
@@ -264,6 +316,16 @@ public class MedicineOrderServiceImpl implements MedicineOrderService {
         double averageAmount = orders.stream()
                 .mapToDouble(MedicineOrder::getTotalAmount)
                 .average()
+                .orElse(0.0);
+
+        double minAmount = orders.stream()
+                .mapToDouble(MedicineOrder::getTotalAmount)
+                .min()
+                .orElse(0.0);
+
+        double maxAmount = orders.stream()
+                .mapToDouble(MedicineOrder::getTotalAmount)
+                .max()
                 .orElse(0.0);
 
         long prescriptionCount = orders.stream()
@@ -286,6 +348,8 @@ public class MedicineOrderServiceImpl implements MedicineOrderService {
                 cancelledCount,
                 totalDeliveredRevenue,
                 averageAmount,
+                minAmount,
+                maxAmount,
                 prescriptionCount,
                 prescriptionPercent,
                 statusCounts,
@@ -295,22 +359,22 @@ public class MedicineOrderServiceImpl implements MedicineOrderService {
 
     private void validateAddressAndPhone(String address, String phone) {
         if (address == null || address.trim().length() < 5) {
-            throw new BusinessException("Адрес доставки обязателен (не менее 5 символов).");
+            throw new BusinessException("Поле «Адрес доставки» обязательно и должно содержать не менее 5 символов.");
         }
         if (address.trim().length() > 255) {
-            throw new BusinessException("Адрес доставки не должен превышать 255 символов.");
+            throw new BusinessException("Поле «Адрес доставки» не должно превышать 255 символов.");
         }
         if (phone == null || phone.trim().length() < 6) {
-            throw new BusinessException("Контактный номер телефона обязателен (не менее 6 символов).");
+            throw new BusinessException("Поле «Контактный телефон» обязательно и должно содержать не менее 6 символов.");
         }
         if (phone.trim().length() > 25) {
-            throw new BusinessException("Контактный номер телефона не должен превышать 25 символов.");
+            throw new BusinessException("Поле «Контактный телефон» не должно превышать 25 символов.");
         }
     }
 
     private void validateAmount(double amount) {
-        if (amount <= 0.0) {
-            throw new BusinessException("Сумма заказа должна быть строго положительной (больше 0 руб.).");
+        if (Double.isNaN(amount) || Double.isInfinite(amount) || amount <= 0.0) {
+            throw new BusinessException("Поле «Сумма заказа» должно быть строго положительным числом (больше 0 руб.).");
         }
         if (amount > 100_000.0) {
             throw new BusinessException("Сумма разового заказа лекарств не может превышать 100 000 руб.");
@@ -320,10 +384,10 @@ public class MedicineOrderServiceImpl implements MedicineOrderService {
     private void validatePrescription(boolean isRequired, String prescriptionNumber) {
         if (isRequired) {
             if (prescriptionNumber == null || prescriptionNumber.trim().isEmpty()) {
-                throw new BusinessException("Для рецептурных препаратов обязательно указание номера рецепта.");
+                throw new BusinessException("Для рецептурных препаратов обязательно заполните поле «Номер рецепта» (например, RX-77-90214).");
             }
             if (prescriptionNumber.trim().length() > 60) {
-                throw new BusinessException("Номер рецепта не должен превышать 60 символов.");
+                throw new BusinessException("Поле «Номер рецепта» не должно превышать 60 символов.");
             }
         }
     }

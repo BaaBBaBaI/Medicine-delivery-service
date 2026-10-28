@@ -5,7 +5,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 /**
- * Сущность клиента / пользователя системы.
+ * Связанная сущность — Клиент.
  */
 public class User {
     private Long id;
@@ -15,7 +15,7 @@ public class User {
     private String defaultAddress;
     private LocalDateTime registeredAt;
 
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
+    public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
 
     public User() {
         this.registeredAt = LocalDateTime.now();
@@ -97,8 +97,6 @@ public class User {
 
     @Override
     public String toString() {
-        return String.format("User[ID=%d, Имя='%s', Телефон='%s', Email='%s', Адрес='%s', Регистрация=%s]",
-                id, fullName, phone, email, defaultAddress, 
-                registeredAt != null ? registeredAt.format(FORMATTER) : "—");
+        return String.format("%s (%s)", fullName, phone);
     }
 }
