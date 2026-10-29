@@ -16,10 +16,6 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- * Менеджер подключения к базе данных PostgreSQL через JDBC (Singleton).
- * Читает параметры подключения из src/main/resources/database.properties (и application.properties).
- */
 public class DatabaseManager {
     private static final Logger log = Logger.getLogger(DatabaseManager.class.getName());
     private static volatile DatabaseManager instance;
@@ -47,11 +43,9 @@ public class DatabaseManager {
     private void loadProperties() {
         Properties props = new Properties();
 
-        // 1. Загрузка из classpath: сначала application.properties, затем приоритетный database.properties
         loadFromClasspath(props, "application.properties");
         loadFromClasspath(props, "database.properties");
 
-        // 2. Чтение из локальных файлов при наличии
         loadFromFile(props, new File("src/main/resources/application.properties"));
         loadFromFile(props, new File("src/main/resources/database.properties"));
         loadFromFile(props, new File("application.properties"));
