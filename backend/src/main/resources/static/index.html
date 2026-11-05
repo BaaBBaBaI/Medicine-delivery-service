@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="МедДоставка — информационная система заказа и доставки лекарств">
+    <title>МедДоставка — Заказ доставки лекарств</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/styles.css?v=meddelivery-kr3">
+</head>
+<body>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<section id="login-view" class="login-shell">
+    <form id="login-form" class="card login-card" autocomplete="on">
+        <div class="brand-mark">RX</div>
+        <h1>МедДоставка</h1>
+        <p class="muted">Информационная система заказа доставки лекарств</p>
+        <label>Email сотрудника
+            <input id="login-email" type="email" autocomplete="username" required maxlength="254" placeholder="admin@example.org">
+        </label>
+        <label>Пароль
+            <input id="login-password" type="password" autocomplete="current-password" required maxlength="128">
+        </label>
+        <button class="primary" type="submit">Войти в систему</button>
+        <p id="login-error" class="error" hidden></p>
+    </form>
+</section>
+
+<div id="app-view" class="app-shell" hidden>
+    <aside class="sidebar">
+        <div class="brand"><span class="brand-mark small">RX</span><strong>МедДоставка</strong></div>
+        <nav id="navigation">
+            <button data-tab="dashboard" class="nav-item active">Аналитика</button>
+            <button data-tab="orders" class="nav-item">Заказы лекарств</button>
+            <button data-tab="customers" class="nav-item">Клиенты аптеки</button>
+            <button data-tab="users" class="nav-item admin-only">Пользователи</button>
+            <button data-tab="audit" class="nav-item admin-only">Журнал аудита</button>
+
+            <a href="/swagger-ui.html"
+               class="nav-item nav-link admin-only"
+               target="_blank"
+               rel="noopener noreferrer"
+               title="Открыть документацию Swagger UI в новой вкладке">
+                Swagger API ↗
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <div id="current-user" class="current-user"></div>
+            <button id="change-password" class="secondary full">Сменить пароль</button>
+            <button id="logout" class="danger-outline full">Выйти</button>
+        </div>
+    </aside>
+
+    <main class="content">
+        <header class="topbar">
+            <div>
+                <h2 id="page-title">Аналитика</h2>
+                <p id="page-subtitle" class="muted">Сводные показатели службы доставки медикаментов</p>
+            </div>
+            <span id="connection-state" class="badge success">REST API подключён</span>
+        </header>
+
+        <section id="tab-dashboard" class="tab active">
+            <div id="metric-grid" class="metric-grid"></div>
+            <div class="grid-3">
+                <article class="card"><h3>По клиентам аптеки</h3><div id="chart-customers" class="bar-list"></div></article>
+                <article class="card"><h3>По статусам заказа</h3><div id="chart-status" class="bar-list"></div></article>
+                <article class="card"><h3>По приоритету доставки</h3><div id="chart-priority" class="bar-list"></div></article>
+            </div>
+        </section>
+
+        <section id="tab-orders" class="tab">
+            <div class="toolbar card">
+                <div class="search-wrap">
+                    <input id="order-search" type="search" maxlength="500"
+                           placeholder="Амоксиклав клиент:CL-1001 статус:создан рецепт:да сумма>1500 приоритет:критический тег:срочно">
+                    <select id="order-sort" class="sort-select" aria-label="Сортировка заказов">
+                        <option value="created,desc">Дата создания (новые)</option>
+                        <option value="created,asc">Дата создания (старые)</option>
+                        <option value="amount,desc">Сумма заказа (по убыв.)</option>
+                        <option value="amount,asc">Сумма заказа (по возр.)</option>
+                        <option value="orderNumber,asc">Номер заказа (А–Я)</option>
+                        <option value="orderNumber,desc">Номер заказа (Я–А)</option>
+                        <option value="priority,desc">Приоритет доставки</option>
+                        <option value="status,asc">Статус заказа</option>
+                    </select>
+                    <button id="search-orders" class="primary">Найти</button>
+                </div>
+                <div class="toolbar-actions pharmacist-only">
+                    <button id="add-order" class="primary">+ Новый заказ</button>
+                    <button id="bulk-action" class="secondary">Массовая операция</button>
+                    <button id="import-csv" class="secondary">Импорт CSV</button>
+                    <button id="export-csv" class="secondary">Экспорт CSV</button>
+                </div>
+                <details class="filter-help">
+                    <summary>Подсказка по умному фильтру заказов</summary>
+                    <code>клиент:CL-1001 статус:собирается рецепт:да сумма&gt;=2000 приоритет:критический тег:термолабильный архив:все</code>
+                </details>
+            </div>
+            <div class="card table-card">
+                <div class="table-scroll">
+                    <table>
+                        <thead><tr>
+                            <th class="pharmacist-only"><input id="select-all-orders" type="checkbox" aria-label="Выбрать все заказы"></th>
+                            <th>Номер / Препараты</th>
+                            <th>Клиент / Адрес</th>
+                            <th>Статус</th>
+                            <th>Оплата</th>
+                            <th>Сумма (₽)</th>
+                            <th>Рецепт</th>
+                            <th>Приоритет</th>
+                            <th>Теги</th>
+                            <th>Действия</th>
+                        </tr></thead>
+                        <tbody id="orders-body"></tbody>
+                    </table>
+                </div>
+                <div class="pager">
+                    <button id="orders-prev" class="secondary">←</button>
+                    <span id="orders-page"></span>
+                    <button id="orders-next" class="secondary">→</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-customers" class="tab">
+            <div class="toolbar card">
+                <p>Справочник постоянных клиентов аптечной сети (связанная сущность).</p>
+                <button id="add-customer" class="primary admin-only">+ Добавить клиента</button>
+            </div>
+            <div class="card table-card"><div class="table-scroll"><table>
+                <thead><tr><th>Код</th><th>ФИО клиента</th><th>Телефон</th><th>Email</th><th>Адрес доставки по умолчанию</th><th>Активен</th><th class="admin-only">Действия</th></tr></thead>
+                <tbody id="customers-body"></tbody>
+            </table></div></div>
+        </section>
+
+        <section id="tab-users" class="tab admin-only">
+            <div class="toolbar card">
+                <p>Управление учётными записями сотрудников и уровнями доступа.</p>
+                <button id="add-user" class="primary">+ Сотрудник</button>
+            </div>
+            <div class="card table-card"><div class="table-scroll"><table>
+                <thead><tr><th>Email</th><th>ФИО / Должность</th><th>Роли</th><th>Активен</th><th>Временный пароль</th><th>Действия</th></tr></thead>
+                <tbody id="users-body"></tbody>
+            </table></div></div>
+        </section>
+
+        <section id="tab-audit" class="tab admin-only">
+            <div class="toolbar card search-wrap">
+                <input id="audit-search" type="search" maxlength="200" placeholder="Email сотрудника, тип события, сущность, описание или Correlation ID">
+                <button id="search-audit" class="primary">Найти</button>
+            </div>
+            <div class="card table-card"><div class="table-scroll"><table>
+                <thead><tr><th>Время</th><th>Сотрудник</th><th>Событие</th><th>Сущность</th><th>Описание</th><th>Correlation ID</th></tr></thead>
+                <tbody id="audit-body"></tbody>
+            </table></div></div>
+        </section>
+    </main>
+</div>
+
+<dialog id="entity-dialog"><form id="entity-form" method="dialog" class="dialog-form"></form></dialog>
+
+<dialog id="notes-dialog">
+    <div class="dialog-form wide">
+        <div class="dialog-head">
+            <h3 id="notes-dialog-title">Заметки к заказу</h3>
+            <button data-close-dialog="notes-dialog" class="icon-button">×</button>
+        </div>
+        <div id="notes-list"></div>
+        <form id="note-form">
+            <input type="hidden" id="note-edit-id" value="">
+            <input type="hidden" id="note-edit-version" value="">
+            <label>Текст служебной заметки фармацевта / курьера
+                <textarea id="note-body" maxlength="4000" required placeholder="Укажите комментарий по проверке рецепта, комплектации или доставке"></textarea>
+            </label>
+            <label class="inline"><input id="note-pinned" type="checkbox"> Закрепить заметку наверху карточки</label>
+            <div class="button-row">
+                <button id="note-submit-btn" class="primary" type="submit">Добавить заметку</button>
+                <button id="note-cancel-edit" class="secondary" type="button" hidden>Отменить редактирование</button>
+            </div>
+        </form>
+    </div>
+</dialog>
+
+<dialog id="csv-dialog">
+    <div class="dialog-form wide">
+        <div class="dialog-head">
+            <h3>Импорт заказов из CSV</h3>
+            <button data-close-dialog="csv-dialog" class="icon-button">×</button>
+        </div>
+        <label>CSV-файл (UTF-8)
+            <input id="csv-file" type="file" accept=".csv,text/csv">
+        </label>
+        <label>Режим импорта
+            <select id="csv-mode">
+                <option value="CREATE_ONLY">Только новые записи (CREATE_ONLY)</option>
+                <option value="UPSERT_BY_EXTERNAL_ID">Обновить по номеру заказа (UPSERT_BY_EXTERNAL_ID)</option>
+            </select>
+        </label>
+        <p class="muted">Обязательные колонки: <code>orderNumber,customerCode,medicationSummary,deliveryAddress,contactPhone,totalAmount,status,paymentMethod,prescriptionRequired,prescriptionNumber,deliveryNotes,tags</code></p>
+        <div class="button-row">
+            <button id="csv-preview" class="secondary" type="button">1. Проверить файл</button>
+            <button id="csv-apply" class="primary" type="button" disabled>2. Применить импорт</button>
+        </div>
+        <pre id="csv-result" class="result-box"></pre>
+    </div>
+</dialog>
+
+<script src="/app.js?v=meddelivery-kr3" defer></script>
+</body>
+</html>
