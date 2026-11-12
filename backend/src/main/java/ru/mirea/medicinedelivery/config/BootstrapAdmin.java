@@ -15,7 +15,6 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 
-/** Создаёт первого администратора только при отсутствии пользователей в БД из внешних переменных окружения. */
 @Component
 public class BootstrapAdmin implements CommandLineRunner {
     private static final Logger log = LoggerFactory.getLogger(BootstrapAdmin.class);
@@ -46,7 +45,7 @@ public class BootstrapAdmin implements CommandLineRunner {
         policy.validate(password, email);
         UserAccount admin = new UserAccount(UUID.randomUUID(), email,
                 properties.bootstrap().name() == null || properties.bootstrap().name().isBlank()
-                        ? "System Administrator" : properties.bootstrap().name().trim(),
+                        ? "Администратор" : properties.bootstrap().name().trim(),
                 encoder.encode(password), Set.of(Role.ADMIN, Role.PHARMACIST, Role.VIEWER));
         admin.setPasswordChangeRequired(true);
         users.save(admin);

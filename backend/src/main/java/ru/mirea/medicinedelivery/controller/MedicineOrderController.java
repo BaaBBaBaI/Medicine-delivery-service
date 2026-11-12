@@ -37,7 +37,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.UUID;
 
-/** REST-контроллер основной сущности — заказов доставки лекарств. */
 @RestController
 @RequestMapping("/api/orders")
 @SecurityRequirement(name = "bearerAuth")

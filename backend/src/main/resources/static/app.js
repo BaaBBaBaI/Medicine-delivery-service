@@ -27,8 +27,8 @@ const canEdit = () => roles().has('PHARMACIST') || isAdmin();
 function roleLabel(value) {
     return ({
         ADMIN: 'Администратор',
-        PHARMACIST: 'Фармацевт-диспетчер',
-        VIEWER: 'Наблюдатель (курьер)'
+        PHARMACIST: 'Фармацевт',
+        VIEWER: 'Курьер'
     })[value] || value;
 }
 
@@ -224,11 +224,35 @@ function showLogin() {
     state.user = null;
 }
 
+function renderCurrentUser() {
+    if (!state.user) return;
+    const rawName = (state.user.displayName || '').trim();
+    const displayName = (rawName === 'System Administrator' || rawName === 'Admin' || !rawName)
+        ? 'Администратор'
+        : rawName;
+
+    let primaryRole = 'Курьер';
+    if (isAdmin()) {
+        primaryRole = 'Администратор';
+    } else if (roles().has('PHARMACIST')) {
+        primaryRole = 'Фармацевт';
+    }
+
+    const userNode = $('current-user');
+    if (userNode) {
+        userNode.innerHTML = `
+            <div class="user-name">${escapeHtml(displayName)}</div>
+            <div class="user-email">${escapeHtml(state.user.email)}</div>
+            <span class="user-role-badge">${escapeHtml(primaryRole)}</span>
+        `;
+    }
+}
+
 async function enterApplication() {
     $('login-view').hidden = true;
     $('app-view').hidden = false;
     applyRoleVisibility();
-    $('current-user').innerHTML = `<strong>${escapeHtml(state.user.displayName)}</strong><br>${escapeHtml(state.user.email)}<br>${escapeHtml(state.user.roles.map(roleLabel).join(', '))}`;
+    renderCurrentUser();
 
     if (state.user.passwordChangeRequired) {
         toast('Необходимо сменить временный пароль после создания учётной записи', true);
@@ -253,13 +277,14 @@ function switchTab(name) {
     document.querySelectorAll('.tab').forEach(tab => tab.classList.toggle('active', tab.id === `tab-${name}`));
     document.querySelectorAll('.nav-item').forEach(button => button.classList.toggle('active', button.dataset.tab === name));
     const titles = {
-        dashboard: ['Аналитика', 'Сводные показатели службы доставки медикаментов'],
-        orders: ['Заказы лекарств', 'Умный поиск, фильтрация, рецептурный контроль и массовые операции'],
-        customers: ['Клиенты аптеки', 'Справочник получателей доставки и адресов по умолчанию'],
-        users: ['Пользователи', 'Управление сотрудниками, ролями и временными паролями'],
-        audit: ['Журнал аудита', 'Прослеживаемость входов и изменений с Correlation ID']
+        dashboard: 'Аналитика',
+        orders: 'Заказы лекарств',
+        customers: 'Клиенты аптеки',
+        users: 'Пользователи',
+        audit: 'Журнал аудита'
     };
-    [$('page-title').textContent, $('page-subtitle').textContent] = titles[name];
+    if ($('page-title')) $('page-title').textContent = titles[name] || '';
+    if ($('page-subtitle')) $('page-subtitle').textContent = '';
     if (name === 'orders') loadOrders();
     if (name === 'customers') renderCustomers();
     if (name === 'users' && isAdmin()) loadUsers();
@@ -362,8 +387,8 @@ function renderOrders() {
         <td><small>${escapeHtml(paymentLabel(order.paymentMethod))}</small></td>
         <td><strong>${escapeHtml(formatMoney(order.totalAmount))}</strong></td>
         <td>${order.prescriptionRequired
-            ? `<span class="badge warning" title="${escapeHtml(order.prescriptionNumber || '')}">По рецепту (${escapeHtml(order.prescriptionNumber || '—')})</span>`
-            : 'Без рецепта'}</td>
+            ? `<span class="badge warning">По рецепту</span>${order.prescriptionNumber ? `<div class="prescription-number" title="${escapeHtml(order.prescriptionNumber)}">№ ${escapeHtml(order.prescriptionNumber.replace(/^RX-?/i, ''))}</div>` : ''}`
+            : '<span class="muted">Без рецепта</span>'}</td>
         <td><span class="badge priority-${order.priorityLevel}">${escapeHtml(priorityLabel(order.priorityLevel))}</span></td>
         <td>${(order.tags || []).map(tag => `<span class="badge">${escapeHtml(tag)}</span>`).join(' ') || '—'}</td>
         <td><div class="actions">
@@ -413,23 +438,23 @@ function orderForm(order = null, readOnly = false) {
         </div>` : '';
 
     return `<div class="dialog-head">
-        <h3>${order ? (readOnly ? 'Карточка заказа доставки лекарств' : 'Редактирование заказа') : 'Новый заказ доставки лекарств'}</h3>
+        <h3>${order ? (readOnly ? 'Карточка заказа' : 'Редактирование заказа') : 'Новый заказ'}</h3>
         <button type="button" data-close-dialog="entity-dialog" class="icon-button">×</button>
     </div>
     <div class="form-grid">
-        <label>Номер заказа (внешний ID)
+        <label>Номер заказа
             <input name="orderNumber" maxlength="100" placeholder="Авто (ORD-YYYYMMDD-XXXX)" value="${escapeHtml(order?.orderNumber || '')}" ${readOnly ? 'disabled' : ''}>
         </label>
-        <label>Клиент аптеки (справочник)
+        <label>Клиент аптеки
             <select name="customerId" id="order-customer-select" ${readOnly ? 'disabled' : ''}>${customerOptions}</select>
         </label>
-        <label class="span-2">Состав заказа (лекарственные препараты и дозировки)
+        <label class="span-2">Состав заказа
             <input name="medicationSummary" required maxlength="500" placeholder="Например: Амоксиклав 875+125 мг №14, Линекс Форте №14" value="${escapeHtml(order?.medicationSummary || '')}" ${readOnly ? 'disabled' : ''}>
         </label>
         <label class="span-2">Адрес доставки
             <input name="deliveryAddress" id="order-address-input" required maxlength="255" placeholder="г. Москва, пр-т Вернадского, д. 78, кв. 45" value="${escapeHtml(order?.deliveryAddress || '')}" ${readOnly ? 'disabled' : ''}>
         </label>
-        <label>Контактный телефон получателя
+        <label>Контактный телефон
             <input name="contactPhone" id="order-phone-input" type="tel" inputmode="numeric" required maxlength="16" pattern="\+7-[0-9]{3}-[0-9]{3}-[0-9]{2}-[0-9]{2}" title="Формат: +7-999-999-99-99" placeholder="+7-999-999-99-99" value="${escapeHtml(order?.contactPhone ? formatRussianPhone(order.contactPhone) : '')}" ${readOnly ? 'disabled' : ''}>
         </label>
         <label>Сумма заказа (₽)
@@ -445,10 +470,10 @@ function orderForm(order = null, readOnly = false) {
             <input name="prescriptionRequired" id="order-rx-checkbox" type="checkbox" ${order?.prescriptionRequired ? 'checked' : ''} ${readOnly ? 'disabled' : ''}>
             Требуется рецепт врача
         </label>
-        <label>Номер рецепта (обязателен при рецептурном отпуске)
-            <input name="prescriptionNumber" id="order-rx-number" maxlength="60" placeholder="RX-77-2026-00123" value="${escapeHtml(order?.prescriptionNumber || '')}" ${readOnly ? 'disabled' : ''}>
+        <label>Номер рецепта
+            <input name="prescriptionNumber" id="order-rx-number" maxlength="60" placeholder="77-2026-00123" value="${escapeHtml(order?.prescriptionNumber || '')}" ${readOnly ? 'disabled' : ''}>
         </label>
-        <label class="span-2">Примечание к доставке / инструкции курьеру
+        <label class="span-2">Примечание к доставке
             <input name="deliveryNotes" maxlength="1000" placeholder="Код домофона, температурный режим, интервал доставки" value="${escapeHtml(order?.deliveryNotes || '')}" ${readOnly ? 'disabled' : ''}>
         </label>
         <label class="span-2">Теги заказа (через запятую)
@@ -669,10 +694,10 @@ async function exportCsv() {
 
 function customerForm(customer = null) {
     return `<div class="dialog-head">
-        <h3>${customer ? 'Изменение клиента аптеки' : 'Новый клиент аптеки'}</h3>
+        <h3>${customer ? 'Редактирование клиента' : 'Новый клиент'}</h3>
         <button type="button" data-close-dialog="entity-dialog" class="icon-button">×</button>
     </div>
-    <label>Код клиента (карта лояльности)
+    <label>Код клиента
         <input name="code" required maxlength="50" placeholder="CL-1006" value="${escapeHtml(customer?.code || '')}">
     </label>
     <label>ФИО клиента
@@ -684,12 +709,12 @@ function customerForm(customer = null) {
     <label>Email
         <input name="email" type="email" maxlength="254" placeholder="client@example.org" value="${escapeHtml(customer?.email || '')}">
     </label>
-    <label>Адрес доставки по умолчанию
+    <label>Адрес доставки
         <input name="defaultAddress" required maxlength="255" placeholder="г. Москва, ул. Строителей, д. 10, кв. 15" value="${escapeHtml(customer?.defaultAddress || '')}">
     </label>
-    <label class="inline"><input name="active" type="checkbox" ${customer?.active !== false ? 'checked' : ''}> Активен в справочнике</label>
+    <label class="inline"><input name="active" type="checkbox" ${customer?.active !== false ? 'checked' : ''}> Клиент активен</label>
     <div class="form-message error" data-form-error hidden></div>
-    <button class="primary" type="submit">Сохранить клиента</button>`;
+    <button class="primary" type="submit">Сохранить</button>`;
 }
 
 async function openCustomer(id = null) {
@@ -762,17 +787,17 @@ async function loadUsers() {
 function userForm(user = null) {
     const checked = role => user?.roles.includes(role) || (!user && role === 'VIEWER');
     return `<div class="dialog-head">
-        <h3>${user ? 'Изменение сотрудника' : 'Новый сотрудник'}</h3>
+        <h3>${user ? 'Редактирование сотрудника' : 'Новый сотрудник'}</h3>
         <button type="button" data-close-dialog="entity-dialog" class="icon-button">×</button>
     </div>
-    <label>Email (логин)
+    <label>Email
         <input name="email" type="email" required maxlength="254" value="${escapeHtml(user?.email || '')}">
     </label>
-    <label>ФИО и должность
+    <label>ФИО
         <input name="displayName" required maxlength="160" value="${escapeHtml(user?.displayName || '')}">
     </label>
-    ${user ? '' : '<label>Временный пароль (мин. 12 символов, регистры, цифра, спецсимвол)<input name="temporaryPassword" type="password" required minlength="12" maxlength="128"></label>'}
-    <fieldset><legend>Уровни доступа (роли)</legend>
+    ${user ? '' : '<label>Временный пароль (мин. 12 символов)<input name="temporaryPassword" type="password" required minlength="12" maxlength="128"></label>'}
+    <fieldset><legend>Роли доступа</legend>
         ${['VIEWER', 'PHARMACIST', 'ADMIN'].map(r => `<label class="inline"><input type="checkbox" name="roles" value="${r}" ${checked(r) ? 'checked' : ''}> ${escapeHtml(roleLabel(r))}</label>`).join('')}
     </fieldset>
     ${user ? `<label class="inline"><input type="checkbox" name="enabled" ${user.enabled ? 'checked' : ''}> Учётная запись активна</label>` : ''}

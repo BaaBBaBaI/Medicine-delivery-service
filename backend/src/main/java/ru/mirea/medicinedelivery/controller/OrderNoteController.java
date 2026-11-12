@@ -19,7 +19,6 @@ import ru.mirea.medicinedelivery.service.OrderNoteService;
 import java.util.List;
 import java.util.UUID;
 
-/** REST-контроллер служебных заметок к заказам доставки лекарств. */
 @RestController
 @RequestMapping("/api/orders/{orderId}/notes")
 @SecurityRequirement(name = "bearerAuth")

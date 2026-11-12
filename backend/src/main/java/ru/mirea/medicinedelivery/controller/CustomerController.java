@@ -20,7 +20,6 @@ import ru.mirea.medicinedelivery.service.CustomerService;
 import java.util.List;
 import java.util.UUID;
 
-/** REST-контроллер справочника клиентов аптечной сети. */
 @RestController
 @RequestMapping("/api/customers")
 @SecurityRequirement(name = "bearerAuth")

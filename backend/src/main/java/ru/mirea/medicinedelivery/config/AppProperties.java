@@ -9,9 +9,6 @@ import org.springframework.validation.annotation.Validated;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * Типобезопасная конфигурация приложения.
- */
 @Validated
 @ConfigurationProperties(prefix = "app")
 public record AppProperties(
@@ -22,7 +19,6 @@ public record AppProperties(
         boolean permanentDeleteEnabled,
         @Valid ImportLimits importLimits) {
 
-    /** Настройки JWT и срока жизни сессии. */
     public record Jwt(
             @NotBlank String secretBase64,
             @NotBlank String issuer,
@@ -30,11 +26,9 @@ public record AppProperties(
             @Min(1) long refreshDays) {
     }
 
-    /** Данные одноразового bootstrap-администратора. */
     public record Bootstrap(String email, String name, String password) {
     }
 
-    /** Белый список origin для браузерных клиентов. */
     public record Cors(String allowedOrigins) {
         public List<String> asList() {
             if (allowedOrigins == null || allowedOrigins.isBlank()) {
@@ -47,7 +41,6 @@ public record AppProperties(
         }
     }
 
-    /** Ограничения защищённого CSV-импорта. */
     public record ImportLimits(@Min(1) int maxRows) {
     }
 }

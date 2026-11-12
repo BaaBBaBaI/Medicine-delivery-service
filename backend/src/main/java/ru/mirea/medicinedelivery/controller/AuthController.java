@@ -25,7 +25,6 @@ import ru.mirea.medicinedelivery.service.AuthService;
 import java.time.Duration;
 import java.time.Instant;
 
-/** REST-контроллер аутентификации и управления сессиями пользователей. */
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {

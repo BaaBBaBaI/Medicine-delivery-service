@@ -11,7 +11,6 @@ import ru.mirea.medicinedelivery.dto.PageResponse;
 import ru.mirea.medicinedelivery.service.AuditService;
 import ru.mirea.medicinedelivery.web.PageableFactory;
 
-/** REST-контроллер просмотра и поиска по журналу аудита. */
 @RestController
 @RequestMapping("/api/admin/audit")
 @SecurityRequirement(name = "bearerAuth")

@@ -22,7 +22,6 @@ import ru.mirea.medicinedelivery.web.PageableFactory;
 
 import java.util.UUID;
 
-/** Административный REST-контроллер управления пользователями. */
 @RestController
 @RequestMapping("/api/admin/users")
 @SecurityRequirement(name = "bearerAuth")

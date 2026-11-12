@@ -72,7 +72,7 @@ app:
     refresh-days: ${REFRESH_TOKEN_DAYS:14}
   bootstrap:
     email: ${BOOTSTRAP_ADMIN_EMAIL:}
-    name: ${BOOTSTRAP_ADMIN_NAME:System Administrator}
+    name: ${BOOTSTRAP_ADMIN_NAME:Администратор}
     password: ${BOOTSTRAP_ADMIN_PASSWORD:}
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:8080}

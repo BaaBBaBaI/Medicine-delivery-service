@@ -13,7 +13,11 @@
 
 <section id="login-view" class="login-shell">
     <form id="login-form" class="card login-card" autocomplete="on">
-        <div class="brand-mark">RX</div>
+        <div class="brand-mark" aria-hidden="true">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="white">
+                <path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6V3z"/>
+            </svg>
+        </div>
         <h1>МедДоставка</h1>
         <p class="muted">Информационная система заказа доставки лекарств</p>
         <label>Email сотрудника
@@ -29,21 +33,20 @@
 
 <div id="app-view" class="app-shell" hidden>
     <aside class="sidebar">
-        <div class="brand"><span class="brand-mark small">RX</span><strong>МедДоставка</strong></div>
+        <div class="brand">
+            <span class="brand-mark small" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="white">
+                    <path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6V3z"/>
+                </svg>
+            </span>
+            <strong>МедДоставка</strong>
+        </div>
         <nav id="navigation">
             <button data-tab="dashboard" class="nav-item active">Аналитика</button>
             <button data-tab="orders" class="nav-item">Заказы лекарств</button>
             <button data-tab="customers" class="nav-item">Клиенты аптеки</button>
             <button data-tab="users" class="nav-item admin-only">Пользователи</button>
             <button data-tab="audit" class="nav-item admin-only">Журнал аудита</button>
-
-            <a href="/swagger-ui.html"
-               class="nav-item nav-link admin-only"
-               target="_blank"
-               rel="noopener noreferrer"
-               title="Открыть документацию Swagger UI в новой вкладке">
-                Swagger API ↗
-            </a>
         </nav>
         <div class="sidebar-footer">
             <div id="current-user" class="current-user"></div>
@@ -56,9 +59,8 @@
         <header class="topbar">
             <div>
                 <h2 id="page-title">Аналитика</h2>
-                <p id="page-subtitle" class="muted">Сводные показатели службы доставки медикаментов</p>
             </div>
-            <span id="connection-state" class="badge success">REST API подключён</span>
+            <span id="connection-state" class="status-dot" title="Сервер подключён"></span>
         </header>
 
         <section id="tab-dashboard" class="tab active">
@@ -74,7 +76,7 @@
             <div class="toolbar card">
                 <div class="search-wrap">
                     <input id="order-search" type="search" maxlength="500"
-                           placeholder="Амоксиклав клиент:CL-1001 статус:создан рецепт:да сумма>1500 приоритет:критический тег:срочно">
+                           placeholder="Поиск по заказам, препаратам, клиентам или статусу...">
                     <select id="order-sort" class="sort-select" aria-label="Сортировка заказов">
                         <option value="created,desc">Дата создания (новые)</option>
                         <option value="created,asc">Дата создания (старые)</option>
@@ -93,10 +95,6 @@
                     <button id="import-csv" class="secondary">Импорт CSV</button>
                     <button id="export-csv" class="secondary">Экспорт CSV</button>
                 </div>
-                <details class="filter-help">
-                    <summary>Подсказка по умному фильтру заказов</summary>
-                    <code>клиент:CL-1001 статус:собирается рецепт:да сумма&gt;=2000 приоритет:критический тег:термолабильный архив:все</code>
-                </details>
             </div>
             <div class="card table-card">
                 <div class="table-scroll">
@@ -126,7 +124,6 @@
 
         <section id="tab-customers" class="tab">
             <div class="toolbar card">
-                <p>Справочник постоянных клиентов аптечной сети (связанная сущность).</p>
                 <button id="add-customer" class="primary admin-only">+ Добавить клиента</button>
             </div>
             <div class="card table-card"><div class="table-scroll"><table>
@@ -137,7 +134,6 @@
 
         <section id="tab-users" class="tab admin-only">
             <div class="toolbar card">
-                <p>Управление учётными записями сотрудников и уровнями доступа.</p>
                 <button id="add-user" class="primary">+ Сотрудник</button>
             </div>
             <div class="card table-card"><div class="table-scroll"><table>

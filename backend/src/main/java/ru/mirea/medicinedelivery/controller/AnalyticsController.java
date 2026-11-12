@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.mirea.medicinedelivery.dto.AnalyticsDtos.AnalyticsResponse;
 import ru.mirea.medicinedelivery.service.AnalyticsService;
 
-/** REST-контроллер аналитической панели сервиса доставки лекарств. */
 @RestController
 @RequestMapping("/api/analytics")
 @SecurityRequirement(name = "bearerAuth")
